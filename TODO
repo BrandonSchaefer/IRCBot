@@ -1,0 +1,58 @@
+* Implement a Command class which all Commands are implemeneted. This
+  Way ill only have a list of commands.
+
+* Get Mod specific commands working
+  -- figure out the best way to set information from the channel
+* Get ChannelInfomationSave working. This will be the best part!
+
+* Commands and CommandsPerChannel
+
+Command:
+  Basic idea, have a Get, and a Set such that we can edit the command through a Set. Such as
+  a LastFM command !set lastfm Test
+  - bool ServerDataMatchOnCommand(std::string const& server_data) const;
+  - std::string GetStringForCommand(std::string const& server_data) const;
+
+Command::Command(CommandInfo const& info)
+  : get_str(info.get)
+  , set
+{
+}
+
+ChannelData
+{
+  std::string lastfm_username_;
+  // List of mods
+}
+
+GetCurrentPlayingSong Needs lastfm username which is from the ChannelData
+
+CommandUserLevel
+{
+  OWNER,
+  MOD,
+  USER
+}
+
+CommandBreed = {MOD, "ts", "192.168.0.1"};
+
+Command
+{
+  bool Match const;
+  std::string GetReturnString() const;
+  void SetReturnString(std::string const& str);
+}
+
+
+// Easy for basic commands... how do we edit a command?
+for (command : commands)
+  if (command.MatchGet(server_data))
+    bot_.SendData(command.GetStr());
+  else if (command.MatchSet(server_data))
+    command.Set(server_data);
+
+
+TypeOfCommands:
+  BasicCommands = {MATCH, RETURN_STR}
+  SetCommands   = {MATCH, RETURN_STR, DATA}
+  ModCommands   = BASIC | SET
