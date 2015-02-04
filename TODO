@@ -41,6 +41,3 @@ Saving:
 Loading:
   Load SAVESDIR/channel, if that file does not exists check, SAVESDIR/channel_tmp. If that
   does not exists we are done.
-
-LoadedChannelController
-  - Holds all the actual loaded information per channel

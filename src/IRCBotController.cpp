@@ -23,8 +23,6 @@
 #include "IRCBotController.h"
 #include "Utils.h"
 
-#include "ChannelIO.h"
-
 #include <algorithm>
 #include <functional>
 
@@ -33,20 +31,17 @@ namespace irc_bot
 
 namespace
 {
-  // FIXME Move this into a save file per channel
-  std::string const LAST_FM_USERNAME = "SithralLoB";
-
   // CONST SERVER MESSAGES
-  std::string const PRIVMSG  = "PRIVMSG";
-  std::string const MODE     = "MODE";
+  std::string const PRIVMSG = "PRIVMSG";
+  std::string const MODE    = "MODE";
 
   // CONST COMMANDS
-  std::string const STATS    = "stats";
-  std::string const COMPARE  = "compare";
-  std::string const SONG     = "song";
-  std::string const FIB      = "fib";
+  std::string const STATS   = "stats";
+  std::string const COMPARE = "compare";
+  std::string const SONG    = "song";
+  std::string const FIB     = "fib";
 
-  std::string const CHANNEL  = "#colossusofc1out,#thegreatbambibot";
+  std::string const CHANNEL = "#colossusofc1out,#thegreatbambibot";
 }
 
 
@@ -99,12 +94,6 @@ IRCBotController::IRCBotController(IRCBot::Ptr const& bot)
   : basic_commands_(LoadBasicCommands())
   , bot_(bot)
 {
-/*
-  LoadedChannelData data = LoadChannelData("#test");
-  data.custom_commands.push_back({CommandPerm::OWNER, "test", "testing"});
-  SaveChannelData(data);
-*/
-
   if (!bot_->ConnectToServer())
   {
     fprintf(stderr, "Failed to connect to irc server.\n");
@@ -152,16 +141,10 @@ bool IRCBotController::UserHasPermissionsForCommand(PrivateMessageData const& ms
   if (perm == CommandPerm::USER)
     return true;
 
-  // Check if the user is a mod
-  auto const& mods = channel_mods_.find(msg_data.data.channel);
-  if (mods != channel_mods_.end())
-  {
-    for (auto const& mod : mods->second)
-    {
+  if (perm == CommandPerm::MOD)
+    for (auto const& mod : msg_data.data.mod_list)
       if (mod == msg_data.username)
         return true;
-    }
-  }
 
   // Check if its the owner, so skip the '#'
   std::string channel_owner = msg_data.data.channel.substr(1);
@@ -292,12 +275,15 @@ bool IRCBotController::HandleSong(PrivateMessageData const& msg_data) const
     // Move down "song";
     std::string message = RemoveStartingWhitespace(msg_data.message.substr(SONG.size()));
 
-    SongInfo song_info = last_song_.GetCurrentPlayingSong(LAST_FM_USERNAME);
-
-    if (!song_info.artist.empty() && !song_info.title.empty())
+    if (!msg_data.data.lastfm_username.empty())
     {
-      bot_->SendMessage(msg_data.data.channel, song_info.title + " by " + song_info.artist);
-      return true;
+      SongInfo song_info = last_song_.GetCurrentPlayingSong(msg_data.data.lastfm_username);
+
+      if (!song_info.artist.empty() && !song_info.title.empty())
+      {
+        bot_->SendMessage(msg_data.data.channel, song_info.title + " by " + song_info.artist);
+        return true;
+      }
     }
   }
 

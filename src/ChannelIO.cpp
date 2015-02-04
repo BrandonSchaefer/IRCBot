@@ -57,7 +57,11 @@ static std::string LoadRawChannelData(std::string const& channel)
   std::vector<std::string> split_channel_data;
 
   if (raw_channel_data.empty())
+  {
+    // If we have to use the back up make sure we re-save a real version!
     raw_channel_data = ReadInFile(GetBackupFileName(channel).c_str());
+    WriteToFile(raw_channel_data, (DEFAULT_PATH + channel).c_str());
+  }
 
   return raw_channel_data;
 }
@@ -122,6 +126,25 @@ void SaveChannelData(LoadedChannelData const& data)
     ss << cb.perm << " " << cb.match << " " << cb.return_str << "\n";
 
   WriteToFile(ss.str(), (DEFAULT_PATH + data.channel).c_str());
+  WriteToFile(ss.str(), GetBackupFileName(data.channel).c_str());
+}
+
+static std::string GetLastFMUsername(std::string const& line)
+{
+  return RemoveStartingWhitespace(line.substr(LASTFM_USERNAME.size()));
+}
+
+static std::set<std::string> GetModsList(std::string const& line)
+{
+  std::set<std::string> mod_list;
+  std::string raw_username_list = RemoveStartingWhitespace(line.substr(MOD_LIST.size()));
+  std::vector<std::string> split_mod_list = SplitString(raw_username_list, ",\n\0");
+
+  // We dont want duplicates
+  for (auto const& mod : split_mod_list)
+    mod_list.insert(mod);
+
+  return mod_list;
 }
 
 LoadedChannelData LoadChannelData(std::string const& channel)
@@ -137,22 +160,10 @@ LoadedChannelData LoadChannelData(std::string const& channel)
 
     for (auto const& line : split_channel_data)
     {
-      // Find lastfm username
       if (match_str(line.c_str(), LASTFM_USERNAME.c_str()))
-      {
-        std::string username = RemoveStartingWhitespace(line.substr(LASTFM_USERNAME.size()));
-        data.lastfm_username = username;
-      }
-      // Find the mod list
-      else if (match_str(line.c_str(), MOD_LIST.c_str()))
-      {
-        std::string raw_username_list = RemoveStartingWhitespace(line.substr(MOD_LIST.size()));
-        std::vector<std::string> split_mod_list = SplitString(raw_username_list, ",\n\0");
-
-        // We dont want duplicates
-        for (auto const& mod : split_mod_list)
-          data.mod_list.insert(mod);
-      }
+        data.lastfm_username = GetLastFMUsername(line);
+      if (match_str(line.c_str(), MOD_LIST.c_str()))
+        data.mod_list = GetModsList(line);
     }
 
     // Find custom commands

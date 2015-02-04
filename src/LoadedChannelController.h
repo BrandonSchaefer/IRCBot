@@ -32,6 +32,12 @@ class LoadedChannelController
 public:
   LoadedChannelController();
 
+  void SetLastFMUsername(std::string const& channel, std::string const& lastfm_username);
+
+  void AddCustomCommand   (std::string const& channel, CommandBreed const& cb);
+  void RemoveCustomCommand(std::string const& channel, std::string const& match_str);
+
+  void UpdateChannelData(LoadedChannelData const& channel_data);
   LoadedChannelData RequestChannelData(std::string const& channel);
 
 private:

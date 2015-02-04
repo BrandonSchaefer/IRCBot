@@ -26,6 +26,65 @@ LoadedChannelController::LoadedChannelController()
 {
 }
 
+void LoadedChannelController::SetLastFMUsername(std::string const& channel,
+                                                std::string const& lastfm_username)
+{
+  LoadedChannelData channel_data = RequestChannelData(channel);
+  channel_data.lastfm_username = lastfm_username;
+
+  UpdateChannelData(channel_data);
+}
+
+static bool IsDuplicateCommand(std::vector<CommandBreed> const& commands, CommandBreed const& cb)
+{
+  for (auto const& command : commands)
+    if (command.match == cb.match)
+      return true;
+
+  return false;
+}
+
+void LoadedChannelController::AddCustomCommand(std::string const& channel, CommandBreed const& cb)
+{
+  LoadedChannelData channel_data = RequestChannelData(channel);
+
+  if (!IsDuplicateCommand(channel_data.custom_commands, cb))
+  {
+    channel_data.custom_commands.push_back(cb);
+    UpdateChannelData(channel_data);
+  }
+}
+
+void LoadedChannelController::RemoveCustomCommand(std::string const& channel, std::string const& match_str)
+{
+  LoadedChannelData channel_data = RequestChannelData(channel);
+  int index_to_remove = -1;
+  int i = 0;
+
+  for (auto it = channel_data.custom_commands.begin(); it != channel_data.custom_commands.end(); ++it)
+  {
+    if (it->match == match_str)
+    {
+      index_to_remove = i;
+      break;
+    }
+
+    i++;
+  }
+
+  if (index_to_remove > 0)
+  {
+    channel_data.custom_commands.erase(channel_data.custom_commands.begin() + index_to_remove);
+    UpdateChannelData(channel_data);
+  }
+}
+
+void LoadedChannelController::UpdateChannelData(LoadedChannelData const& channel_data)
+{
+  loaded_channel_data_[channel_data.channel] = channel_data;
+  SaveChannelData(channel_data);
+}
+
 LoadedChannelData LoadedChannelController::RequestChannelData(std::string const& channel)
 {
   auto it = loaded_channel_data_.find(channel);

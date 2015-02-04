@@ -28,21 +28,6 @@ namespace irc_bot
 extern void              SaveChannelData(LoadedChannelData const& data);
 extern LoadedChannelData LoadChannelData(std::string const& channel);
 
-/*
-
-class ChannelIO
-{
-public:
-  ChannelIO();
-
-
-  //void LoadFiles();
-
-private:
-
-};
-*/
-
 } // namespace irc_bot
 
 #endif // CHANNEL_I_O_H
