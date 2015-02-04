@@ -12,6 +12,7 @@ set (IRC_BOT_LOADER_SRC
      IRCBotOffline.cpp
      IRCBotController.cpp
      LastFMCurrentSong.cpp
+     LoadedChannelController.cpp
      LoadBasicCommands.cpp
      SymWeaponInfo.cpp
      Utils.cpp
@@ -26,6 +27,8 @@ set (IRC_BOT_LOADER_HDR
      IRCBotController.h
      LastFMCurrentSong.h
      LoadBasicCommands.h
+     LoadedChannelController.h
+     LoadedChannelData.h
      SymWeaponInfo.h
      Utils.h
     )

@@ -42,6 +42,17 @@ std::string RemoveStartingWhitespace(std::string const& str)
   return new_str;
 }
 
+void WriteToFile(std::string const& raw_info, char const* path)
+{
+  std::ofstream os(path, std::ofstream::binary);
+
+  if (os.is_open())
+  {
+    os << raw_info;
+    os.close();
+  }
+}
+
 std::string ReadInFile(char const* path)
 {
   std::string str;
@@ -78,6 +89,34 @@ std::vector<std::string> SplitStringOnNewLineOrNull(std::string const& str)
   for (auto const& c : str)
   {
     if (c != '\n' && c != '\0')
+    {
+      new_str += c;
+    }
+    else
+    {
+      new_str = RemoveStartingWhitespace(new_str);
+      split_str.push_back(new_str);
+      new_str.clear();
+    }
+  }
+
+  if (!new_str.empty())
+  {
+    new_str = RemoveStartingWhitespace(new_str);
+    split_str.push_back(new_str);
+  }
+
+  return split_str;
+}
+
+std::vector<std::string> SplitString(std::string const& str, std::string const& delims)
+{
+  std::vector<std::string> split_str;
+
+  std::string new_str;
+  for (auto const& c : str)
+  {
+    if (delims.find(c) == std::string::npos)
     {
       new_str += c;
     }

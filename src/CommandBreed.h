@@ -24,7 +24,7 @@
 namespace irc_bot
 {
 
-enum class CommandPerm : unsigned int
+enum CommandPerm
 {
   OWNER,
   MOD,

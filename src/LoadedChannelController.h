@@ -16,33 +16,30 @@
 * Authored by: Brandon Schaefer <brandontschaefer@gmail.com>
 */
 
-#ifndef CHANNEL_I_O_H
-#define CHANNEL_I_O_H
+#ifndef LOADED_CHANNEL_CONTROLLER_H
+#define LOADED_CHANNEL_CONTROLLER_H
 
 #include <string>
+#include <unordered_map>
+
 #include "LoadedChannelData.h"
 
 namespace irc_bot
 {
 
-extern void              SaveChannelData(LoadedChannelData const& data);
-extern LoadedChannelData LoadChannelData(std::string const& channel);
-
-/*
-
-class ChannelIO
+class LoadedChannelController
 {
 public:
-  ChannelIO();
+  LoadedChannelController();
 
-
-  //void LoadFiles();
+  LoadedChannelData RequestChannelData(std::string const& channel);
 
 private:
 
+  // mapping between "channel" --> loaded data
+  std::unordered_map<std::string, LoadedChannelData> loaded_channel_data_;
 };
-*/
 
 } // namespace irc_bot
 
-#endif // CHANNEL_I_O_H
+#endif // LOADED_CHANNEL_CONTROLLER_H

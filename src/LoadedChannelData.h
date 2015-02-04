@@ -16,33 +16,27 @@
 * Authored by: Brandon Schaefer <brandontschaefer@gmail.com>
 */
 
-#ifndef CHANNEL_I_O_H
-#define CHANNEL_I_O_H
+#ifndef LOADED_CHANNEL_DATA_H
+#define LOADED_CHANNEL_DATA_H
 
 #include <string>
-#include "LoadedChannelData.h"
+#include <set>
+#include <vector>
+
+#include "CommandBreed.h"
 
 namespace irc_bot
 {
 
-extern void              SaveChannelData(LoadedChannelData const& data);
-extern LoadedChannelData LoadChannelData(std::string const& channel);
-
-/*
-
-class ChannelIO
+struct LoadedChannelData
 {
-public:
-  ChannelIO();
+  std::string channel;
+  std::string lastfm_username;
 
-
-  //void LoadFiles();
-
-private:
-
+  std::set<std::string>     mod_list;
+  std::vector<CommandBreed> custom_commands;
 };
-*/
 
 } // namespace irc_bot
 
-#endif // CHANNEL_I_O_H
+#endif // LOADED_CHANNEL_DATA_H

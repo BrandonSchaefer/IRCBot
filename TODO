@@ -5,54 +5,42 @@
   -- figure out the best way to set information from the channel
 * Get ChannelInfomationSave working. This will be the best part!
 
-* Commands and CommandsPerChannel
 
-Command:
-  Basic idea, have a Get, and a Set such that we can edit the command through a Set. Such as
-  a LastFM command !set lastfm Test
-  - bool ServerDataMatchOnCommand(std::string const& server_data) const;
-  - std::string GetStringForCommand(std::string const& server_data) const;
+* Get Command Per Channel working:
+  - Load all saved commands per channel
+  - Save all new commands to each channel
+    -- Each time a new command is added or changed update the Save file (SAVESDIR/channel)
 
-Command::Command(CommandInfo const& info)
-  : get_str(info.get)
-  , set
+Loading all commands and saves:
+
+CONSTS
+LastFM username
+Specs
+
+MODS Lists
+
+CUSTOM BASIC COMMANDS
+
+class LoadedChannelCommands()
 {
+  std::string GetLastFMUsername() const;
+  std::string Specs() const;
+
+  std::vector<CommandBreeds> GetCustomCommands() const;
 }
 
-ChannelData
-{
-  std::string lastfm_username_;
-  // List of mods
-}
+Basic idea:
+  When we join a channel, attempt to load the save file with the info under it
+  if that file does not exists, create a new blank one.
 
-GetCurrentPlayingSong Needs lastfm username which is from the ChannelData
+Saving:
+  Make sure to backup the save file! (Since we are overwriting it!):
+    Load old save file, save file to .channel_backup
+    Save new data to old save file! // If an error happens with in this we can recover
 
-CommandUserLevel
-{
-  OWNER,
-  MOD,
-  USER
-}
+Loading:
+  Load SAVESDIR/channel, if that file does not exists check, SAVESDIR/channel_tmp. If that
+  does not exists we are done.
 
-CommandBreed = {MOD, "ts", "192.168.0.1"};
-
-Command
-{
-  bool Match const;
-  std::string GetReturnString() const;
-  void SetReturnString(std::string const& str);
-}
-
-
-// Easy for basic commands... how do we edit a command?
-for (command : commands)
-  if (command.MatchGet(server_data))
-    bot_.SendData(command.GetStr());
-  else if (command.MatchSet(server_data))
-    command.Set(server_data);
-
-
-TypeOfCommands:
-  BasicCommands = {MATCH, RETURN_STR}
-  SetCommands   = {MATCH, RETURN_STR, DATA}
-  ModCommands   = BASIC | SET
+LoadedChannelController
+  - Holds all the actual loaded information per channel

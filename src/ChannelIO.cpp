@@ -18,7 +18,9 @@
 
 #include <vector>
 
+#include "CommandBreed.h"
 #include "ChannelIO.h"
+#include "LoadBasicCommands.h"
 #include "Utils.h"
 
 #include "config.h"
@@ -29,36 +31,135 @@ namespace irc_bot
 namespace
 {
   std::string const DEFAULT_PATH   = SAVESDIR"/";
+  std::string const BACK_SAVE      = "_backup";
   std::string const CHANNELS_LISTS = "channels_list";
+
+  std::string const LASTFM_USERNAME = "LASTFM_USERNAME:";
+  std::string const MOD_LIST        = "MOD_LIST:";
 }
 
-std::vector<std::string> LoadChannelsListTextFile()
+static std::string GetBackupFileName(std::string const& channel)
 {
-  std::string raw_channels_list = ReadInFile((DEFAULT_PATH + CHANNELS_LISTS).c_str());
-  std::vector<std::string> channel_files_to_load = SplitStringOnNewLineOrNull(raw_channels_list);
-
-  return channel_files_to_load;
+  return DEFAULT_PATH + "." + channel + BACK_SAVE;
 }
 
-// FIXME figure out if i need a class here or not
-ChannelIO::ChannelIO()
+/*
+
+Main idea, check if SAVESDIR/channel files exists, otherwise
+  check if the backup file SAVESDIR/.channel_backup is around.
+
+If a file is found, then split it up on newlines or '\0' into a vector
+
+*/
+static std::string LoadRawChannelData(std::string const& channel)
 {
+  std::string raw_channel_data = ReadInFile((DEFAULT_PATH + channel).c_str());
+  std::vector<std::string> split_channel_data;
+
+  if (raw_channel_data.empty())
+    raw_channel_data = ReadInFile(GetBackupFileName(channel).c_str());
+
+  return raw_channel_data;
 }
 
-// FIXME Finish loading all these commands.
-void ChannelIO::LoadFiles()
+/*
+
+# LastFM username :: LASTFM_USERNAME: <username>
+# Mod lists       :: MOD_LIST: <username>,<username>,<username>,...etc
+# CUSTOM COMMANDS :: <CommandPerm> <MatchString> <ReturnString>
+
+LASTFM_USERNAME: sithrallob
+MOD_LIST: sithrallob,thegreatbambibot,other
+1 match return str
+2 diff stuff
+
+*/
+
+/*
+  Make sure to backup the save file! (Since we are overwriting it!):
+    Load old save file, save file to .channel_backup
+    Save new data to old save file! // If an error happens with in this we can recover
+    */
+static std::string GenerateModString(LoadedChannelData const& data)
 {
-  std::vector<std::string> channel_files_to_load = LoadChannelsListTextFile();
-  for (auto const& chan : channel_files_to_load)
+  std::stringstream ss;
+
+  ss << MOD_LIST << " ";
+  size_t i = 0;
+  for (auto const& mod : data.mod_list)
   {
-    std::string chan_loaded = ReadInFile((DEFAULT_PATH + chan).c_str());
-    if (!chan_loaded.empty())
-    {
-      std::vector<std::string> file_contents = SplitStringOnNewLineOrNull(chan_loaded);
-      for (auto const& s : file_contents)
-        printf("%s\n", s.c_str());
-    }
+    ss << mod;
+
+    // stupid fence post
+    if (i < data.mod_list.size() - 1)
+      ss << ",";
+
+    i++;
   }
+  ss << '\n';
+
+  return ss.str();
+}
+
+void SaveChannelData(LoadedChannelData const& data)
+{
+  // Backup the current file
+  std::string raw_channel_data = LoadRawChannelData(data.channel);
+  WriteToFile(raw_channel_data, GetBackupFileName(data.channel).c_str());
+
+  // Create the new info to be saved!
+  std::stringstream ss;
+
+  // LastFM username
+  ss << LASTFM_USERNAME;
+  ss << " " << data.lastfm_username << "\n";
+
+  // Mods list
+  ss << GenerateModString(data);
+
+  // Custom Commands
+  for (auto const& cb : data.custom_commands)
+    ss << cb.perm << " " << cb.match << " " << cb.return_str << "\n";
+
+  WriteToFile(ss.str(), (DEFAULT_PATH + data.channel).c_str());
+}
+
+LoadedChannelData LoadChannelData(std::string const& channel)
+{
+  std::string raw_channel_data = LoadRawChannelData(channel);
+  LoadedChannelData data;
+
+  data.channel = channel;
+
+  if (!raw_channel_data.empty())
+  {
+    std::vector<std::string> split_channel_data = SplitStringOnNewLineOrNull(raw_channel_data);
+
+    for (auto const& line : split_channel_data)
+    {
+      // Find lastfm username
+      if (match_str(line.c_str(), LASTFM_USERNAME.c_str()))
+      {
+        std::string username = RemoveStartingWhitespace(line.substr(LASTFM_USERNAME.size()));
+        data.lastfm_username = username;
+      }
+      // Find the mod list
+      else if (match_str(line.c_str(), MOD_LIST.c_str()))
+      {
+        std::string raw_username_list = RemoveStartingWhitespace(line.substr(MOD_LIST.size()));
+        std::vector<std::string> split_mod_list = SplitString(raw_username_list, ",\n\0");
+
+        // We dont want duplicates
+        for (auto const& mod : split_mod_list)
+          data.mod_list.insert(mod);
+      }
+    }
+
+    // Find custom commands
+    data.custom_commands = LoadBasicCommandsFromString(raw_channel_data);
+  }
+
+  return data;
 }
 
 } // namespace irc_bot

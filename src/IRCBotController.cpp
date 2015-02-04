@@ -99,13 +99,20 @@ IRCBotController::IRCBotController(IRCBot::Ptr const& bot)
   : basic_commands_(LoadBasicCommands())
   , bot_(bot)
 {
-  //ChannelIO io;
-  //io.LoadFiles();
+/*
+  LoadedChannelData data = LoadChannelData("#test");
+  data.custom_commands.push_back({CommandPerm::OWNER, "test", "testing"});
+  SaveChannelData(data);
+*/
 
   if (!bot_->ConnectToServer())
+  {
     fprintf(stderr, "Failed to connect to irc server.\n");
+  }
   else
+  {
     bot_->JoinChannel(CHANNEL);
+  }
 
   bot_->data_received = std::bind(&IRCBotController::RecvDataRecived, this, std::placeholders::_1);
 }
@@ -138,14 +145,15 @@ void IRCBotController::HandleMode(std::string const& server_data)
     channel_mods_[channel].insert(username);
 }
 
-bool IRCBotController::UserHasPermissionsForCommand(PrivateMessageData const& msg_data, CommandPerm const& perm) const
+bool IRCBotController::UserHasPermissionsForCommand(PrivateMessageData const& msg_data,
+                                                    CommandPerm const& perm) const
 {
   // User commands are always valid
   if (perm == CommandPerm::USER)
     return true;
 
   // Check if the user is a mod
-  auto const& mods = channel_mods_.find(msg_data.channel);
+  auto const& mods = channel_mods_.find(msg_data.data.channel);
   if (mods != channel_mods_.end())
   {
     for (auto const& mod : mods->second)
@@ -156,7 +164,7 @@ bool IRCBotController::UserHasPermissionsForCommand(PrivateMessageData const& ms
   }
 
   // Check if its the owner, so skip the '#'
-  std::string channel_owner = msg_data.channel.substr(1);
+  std::string channel_owner = msg_data.data.channel.substr(1);
   return msg_data.username == channel_owner;
 }
 
@@ -183,9 +191,9 @@ void IRCBotController::HandlePrivMsg(std::string const& server_data)
     username = lowercase(username);
     message  = lowercase(message);
 
-    msg_data.channel  = channel;
     msg_data.username = username;
     msg_data.message  = message;
+    msg_data.data     = loaded_controller_.RequestChannelData(channel);
 
     bool handled = false;
 
@@ -205,21 +213,33 @@ void IRCBotController::HandlePrivMsg(std::string const& server_data)
   }
 }
 
-bool IRCBotController::HandleBasic(PrivateMessageData const& msg_data) const
+bool IRCBotController::CheckBasicCommands(std::vector<CommandBreed> const& commands,
+                                          PrivateMessageData const& msg_data) const
 {
-  for (auto const& cb : basic_commands_)
+  for (auto const& cb : commands)
   {
     if (msg_data.message == cb.match)
     {
       if (UserHasPermissionsForCommand(msg_data, cb.perm))
       {
-        bot_->SendMessage(msg_data.channel, cb.return_str);
+        bot_->SendMessage(msg_data.data.channel, cb.return_str);
         return true;
       }
     }
   }
 
   return false;
+}
+
+bool IRCBotController::HandleBasic(PrivateMessageData const& msg_data) const
+{
+  int handled = false;
+  handled = CheckBasicCommands(basic_commands_, msg_data);
+
+  if (!handled)
+    handled = CheckBasicCommands(msg_data.data.custom_commands, msg_data);
+  
+  return handled;
 }
 
 bool IRCBotController::HandleStats(PrivateMessageData const& msg_data) const
@@ -231,7 +251,7 @@ bool IRCBotController::HandleStats(PrivateMessageData const& msg_data) const
 
     if (!weapon_url.empty())
     {
-      bot_->SendMessage(msg_data.channel, "Weapon info for " + message + ": " + weapon_url);
+      bot_->SendMessage(msg_data.data.channel, "Weapon info for " + message + ": " + weapon_url);
       return true;
     }
   }
@@ -256,7 +276,7 @@ bool IRCBotController::HandleCompare(PrivateMessageData const& msg_data) const
 
       if (!compare_url.empty())
       {
-        bot_->SendMessage(msg_data.channel, "Weapon Compare info: " + compare_url);
+        bot_->SendMessage(msg_data.data.channel, "Weapon Compare info: " + compare_url);
         return true;
       }
     }
@@ -276,7 +296,7 @@ bool IRCBotController::HandleSong(PrivateMessageData const& msg_data) const
 
     if (!song_info.artist.empty() && !song_info.title.empty())
     {
-      bot_->SendMessage(msg_data.channel, song_info.title + " by " + song_info.artist);
+      bot_->SendMessage(msg_data.data.channel, song_info.title + " by " + song_info.artist);
       return true;
     }
   }
@@ -297,7 +317,7 @@ bool IRCBotController::HandleFib(PrivateMessageData const& msg_data) const
       if (n > 0)
       {
         std::string fib_str = TypeConverter<uint64_t, std::string>(fib(n));
-        bot_->SendMessage(msg_data.channel, "Fib(" + message + ") = " + fib_str);
+        bot_->SendMessage(msg_data.data.channel, "Fib(" + message + ") = " + fib_str);
         return true;
       }
     }

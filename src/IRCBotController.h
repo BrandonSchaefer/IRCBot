@@ -23,6 +23,7 @@
 #include "IRCBot.h"
 #include "IRCBotOffline.h"
 #include "LastFMCurrentSong.h"
+#include "LoadedChannelController.h"
 
 #include <set>
 #include <vector>
@@ -33,9 +34,9 @@ namespace irc_bot
 
 struct PrivateMessageData
 {
-  std::string channel;
   std::string username;
   std::string message;
+  LoadedChannelData data;
 };
 
 class IRCBotController
@@ -60,9 +61,13 @@ private:
   bool UserHasPermissionsForCommand(PrivateMessageData const& msg_data,
                                     CommandPerm const& perm) const;
 
+  bool CheckBasicCommands(std::vector<CommandBreed> const& commands,
+                          PrivateMessageData const& msg_data) const;
+
   std::vector<CommandBreed> basic_commands_;
   LastFMCurrentSong last_song_;
   IRCBot::Ptr bot_;
+  LoadedChannelController loaded_controller_;
   std::unordered_map<std::string, std::set<std::string>> channel_mods_;
 };
 
