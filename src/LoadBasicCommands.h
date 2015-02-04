@@ -19,6 +19,7 @@
 #ifndef LOAD_BASIC_COMMANDS_H
 #define LOAD_BASIC_COMMANDS_H
 
+#include <string>
 #include <vector>
 
 #include "CommandBreed.h"
@@ -26,6 +27,9 @@
 namespace irc_bot
 {
 
+extern CommandBreed LoadSingleCommandFromString(std::string const& str);
+extern std::vector<CommandBreed> LoadBasicCommandsFromString(std::string const& str);
+extern std::vector<CommandBreed> LoadBasicCommandsFromPath(std::string const& path);
 extern std::vector<CommandBreed> LoadBasicCommands();
 
 } // namespace irc_bot

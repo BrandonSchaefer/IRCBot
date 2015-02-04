@@ -89,6 +89,12 @@ std::vector<std::string> SplitStringOnNewLineOrNull(std::string const& str)
     }
   }
 
+  if (!new_str.empty())
+  {
+    new_str = RemoveStartingWhitespace(new_str);
+    split_str.push_back(new_str);
+  }
+
   return split_str;
 }
 

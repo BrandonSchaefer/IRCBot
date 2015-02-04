@@ -14,10 +14,23 @@ set (CMAKE_INCLUDE_CURRENT_DIR ON)
 set (SAVESDIR "${CMAKE_SOURCE_DIR}/saves")
 configure_file (${CMAKE_SOURCE_DIR}/config.h.cmake ${CMAKE_BINARY_DIR}/config.h) 
 
+if(WIN32)
+  if(NOT WINDOWS)
+    set(WINDOWS TRUE)
+  endif()
+elseif(UNIX)
+  if(CMAKE_SYSTEM_NAME MATCHES ".*Linux")
+    set(LINUX TRUE)
+  endif()
+endif()
+
 add_subdirectory(src)
 
-option(ENABLE_TESTS "Bulid tests" ON)
+# FIXME Figure out how to get gtest working on windows...
+if (LINUX)
+  option(ENABLE_TESTS "Bulid tests" ON)
 
-if (ENABLE_TESTS)
-  add_subdirectory(tests)
-endif ()
+  if (ENABLE_TESTS)
+    add_subdirectory(tests)
+  endif ()
+endif()

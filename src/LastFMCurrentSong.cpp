@@ -43,7 +43,7 @@ LastFMCurrentSong::~LastFMCurrentSong()
   curl_easy_cleanup(curl_);
 }
 
-size_t write_data(char *ptr, size_t size, size_t nmemb, void *userdata)
+static size_t write_data(char *ptr, size_t size, size_t nmemb, void *userdata)
 {
   std::ostringstream *stream = (std::ostringstream*)userdata;
   size_t count = size * nmemb;
@@ -68,7 +68,7 @@ Find the second occurence of title jump over 15 (track + ","name":") == Solace A
 
 */
 
-std::string FindElementInOutput(std::string const& output, std::string const& keyword)
+static std::string FindElementInOutput(std::string const& output, std::string const& keyword)
 {
   // Find the second instance of the keyword
   size_t keyword_start = output.find(keyword) + 1;

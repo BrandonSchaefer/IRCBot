@@ -35,7 +35,7 @@ Format of a BasicCommand:
 int             std::string   std::string
 */
 
-CommandPerm GetPermissionType(unsigned int permisson)
+static CommandPerm GetPermissionType(unsigned int permisson)
 {
   switch (permisson)
   {
@@ -51,7 +51,7 @@ CommandPerm GetPermissionType(unsigned int permisson)
   }
 }
 
-CommandBreed ConstructCommandBreed(std::string const& str)
+static CommandBreed ConstructCommandBreed(std::string const& str)
 {
   CommandBreed cb;
 
@@ -94,11 +94,10 @@ CommandBreed ConstructCommandBreed(std::string const& str)
   return cb;
 }
 
-std::vector<CommandBreed> LoadBasicCommands()
+static std::vector<CommandBreed> ConstructBasicCommands(std::string const& raw_basic_commands)
 {
   std::vector<CommandBreed> commands;
 
-  std::string raw_basic_commands = ReadInFile(BASIC_COMMAND_PATH.c_str());
   std::vector<std::string> basic_commands = SplitStringOnNewLineOrNull(raw_basic_commands);
 
   for (auto const& raw_command : basic_commands)
@@ -110,6 +109,30 @@ std::vector<CommandBreed> LoadBasicCommands()
   }
 
   return commands;
+}
+
+CommandBreed LoadSingleCommandFromString(std::string const& str)
+{
+  return ConstructCommandBreed(str);
+}
+
+std::vector<CommandBreed> LoadBasicCommandsFromString(std::string const& str)
+{
+  return ConstructBasicCommands(str);
+}
+
+std::vector<CommandBreed> LoadBasicCommandsFromPath(std::string const& path)
+{
+  std::string raw_basic_commands = ReadInFile(path.c_str());
+
+  return ConstructBasicCommands(raw_basic_commands);
+}
+
+std::vector<CommandBreed> LoadBasicCommands()
+{
+  std::string raw_basic_commands = ReadInFile(BASIC_COMMAND_PATH.c_str());
+
+  return ConstructBasicCommands(raw_basic_commands);
 }
 
 } // namespace irc_bot

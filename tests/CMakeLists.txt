@@ -58,8 +58,9 @@ if (GTEST_SRC_DIR AND
       )
 
   set (GTEST_BACKEND_SOURCE
-       test_sym_weapons.cpp
        test_irc_bot_controller.cpp
+       test_load_basic_commands.cpp
+       test_sym_weapons.cpp
        test_main.cpp
       )
 

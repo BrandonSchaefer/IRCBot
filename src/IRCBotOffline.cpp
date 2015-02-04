@@ -54,7 +54,6 @@ void IRCBotOffline::JoinChannel(std::string const& channel) const
 
 void IRCBotOffline::SendMessage(std::string const& channel, std::string const& message) const
 {
-  printf("We shouldn't be getting here...\n");
   std::string priv_message = "PRIVMSG " + channel + " :" + message + "\r\n";
   SendData(priv_message);
 }
