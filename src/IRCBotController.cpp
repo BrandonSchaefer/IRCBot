@@ -17,9 +17,7 @@
 */
 
 #include "CommandBreed.h"
-#include "LastFMCurrentSong.h"
 #include "LoadBasicCommands.h"
-#include "SymWeaponInfo.h"
 #include "IRCBotController.h"
 #include "Utils.h"
 
@@ -39,11 +37,12 @@ namespace
   std::string const STATS   = "stats";
   std::string const COMPARE = "compare";
   std::string const SONG    = "song";
+  std::string const CUSTOM  = "custom";
+  std::string const REMOVE  = "remove";
   std::string const FIB     = "fib";
 
   std::string const CHANNEL = "#colossusofc1out,#thegreatbambibot";
 }
-
 
 static std::string GetMessage(std::string const& data)
 {
@@ -72,24 +71,6 @@ static std::string GetChannel(std::string const& data)
   return "";
 }
 
-// Recursion is to slow ... iterative it is :(
-static uint64_t fib(uint64_t n)
-{
-  uint64_t a   = 0;
-  uint64_t b   = 1;
-  uint64_t tmp = 0;
-
-  while (n > 0)
-  {
-    tmp = a;
-    a   = b;
-    b   = tmp + b;
-    --n;
-  }
-
-  return a;
-}
-
 IRCBotController::IRCBotController(IRCBot::Ptr const& bot)
   : basic_commands_(LoadBasicCommands())
   , bot_(bot)
@@ -111,11 +92,11 @@ void IRCBotController::RecvDataRecived(std::string const& data)
   std::string new_data = data;
   new_data.erase(new_data.find_last_not_of("\n\r\t")+1);
 
-  if (match_str(new_data.c_str(), PRIVMSG.c_str()))
+  if (SubStringMatch(new_data, PRIVMSG))
   {
     HandlePrivMsg(new_data);
   }
-  else if (match_str(new_data.c_str(), MODE.c_str()))
+  else if (SubStringMatch(new_data, MODE))
   {
     HandleMode(new_data);
   }
@@ -130,25 +111,13 @@ void IRCBotController::HandleMode(std::string const& server_data)
   size_t username_start = server_data.rfind(' ');
   std::string username  = RemoveStartingWhitespace(server_data.substr(username_start));
 
+  LoadedChannelData channel_data = loaded_controller_.RequestChannelData(channel);
+
   if (!channel.empty())
-    channel_mods_[channel].insert(username);
-}
-
-bool IRCBotController::UserHasPermissionsForCommand(PrivateMessageData const& msg_data,
-                                                    CommandPerm const& perm) const
-{
-  // User commands are always valid
-  if (perm == CommandPerm::USER)
-    return true;
-
-  if (perm == CommandPerm::MOD)
-    for (auto const& mod : msg_data.data.mod_list)
-      if (mod == msg_data.username)
-        return true;
-
-  // Check if its the owner, so skip the '#'
-  std::string channel_owner = msg_data.data.channel.substr(1);
-  return msg_data.username == channel_owner;
+  {
+    channel_data.mod_list.insert(username);
+    loaded_controller_.UpdateChannelData(channel_data);
+  }
 }
 
 std::string lowercase(std::string str)
@@ -174,142 +143,54 @@ void IRCBotController::HandlePrivMsg(std::string const& server_data)
     username = lowercase(username);
     message  = lowercase(message);
 
+    command_handler_.SetUsername(username);
+    command_handler_.SetLoadedChannel(loaded_controller_.RequestChannelData(channel));
+
     msg_data.username = username;
     msg_data.message  = message;
     msg_data.data     = loaded_controller_.RequestChannelData(channel);
 
+    std::string message_for_bot = command_handler_.HandleUserInput(message);
+
     bool handled = false;
 
-    handled = HandleBasic(msg_data);
+    if (!message_for_bot.empty())
+    {
+      bot_->SendMessage(channel, message_for_bot);
+      handled = true;
+    }
 
-    if (!handled)
-      handled = HandleStats(msg_data);
-    if (!handled)
-      handled = HandleCompare(msg_data);
-    if (!handled)
-      handled = HandleSong(msg_data);
-    if (!handled)
-      handled = HandleFib(msg_data);
+    if (SubStringMatch(message, CUSTOM))
+    {
+      handled = HandleCustom(channel, RemoveMatchingWord(message, CUSTOM));
+    }
+    else if (SubStringMatch(message, REMOVE))
+    {
+      handled = HandleRemove(channel, RemoveMatchingWord(message, REMOVE));
+    }
 
     if (!handled)
       fprintf(stderr, "Failed to find a command for: %s\n", message.c_str());
   }
 }
 
-bool IRCBotController::CheckBasicCommands(std::vector<CommandBreed> const& commands,
-                                          PrivateMessageData const& msg_data) const
+
+bool IRCBotController::HandleCustom(std::string const& channel, std::string const& user_input)
 {
-  for (auto const& cb : commands)
+  CommandBreed cb = LoadSingleCommandFromString(user_input);
+
+  if (!cb.match.empty())
   {
-    if (msg_data.message == cb.match)
-    {
-      if (UserHasPermissionsForCommand(msg_data, cb.perm))
-      {
-        bot_->SendMessage(msg_data.data.channel, cb.return_str);
-        return true;
-      }
-    }
+    loaded_controller_.AddCustomCommand(channel, cb);
+    return true;
   }
 
   return false;
 }
 
-bool IRCBotController::HandleBasic(PrivateMessageData const& msg_data) const
+bool IRCBotController::HandleRemove(std::string const& channel, std::string const& user_input)
 {
-  int handled = false;
-  handled = CheckBasicCommands(basic_commands_, msg_data);
-
-  if (!handled)
-    handled = CheckBasicCommands(msg_data.data.custom_commands, msg_data);
-  
-  return handled;
-}
-
-bool IRCBotController::HandleStats(PrivateMessageData const& msg_data) const
-{
-  if (match_str(msg_data.message.c_str(), STATS.c_str()))
-  {
-    std::string message    = RemoveStartingWhitespace(msg_data.message.substr(STATS.size()));
-    std::string weapon_url = GetWeaponURL(message);
-
-    if (!weapon_url.empty())
-    {
-      bot_->SendMessage(msg_data.data.channel, "Weapon info for " + message + ": " + weapon_url);
-      return true;
-    }
-  }
-
-  return false;
-}
-
-bool IRCBotController::HandleCompare(PrivateMessageData const& msg_data) const
-{
-  if (match_str(msg_data.message.c_str(), COMPARE.c_str()))
-  {
-    // Move down "compare";
-    std::string message = RemoveStartingWhitespace(msg_data.message.substr(COMPARE.size()));
-    size_t first_weapon_end = message.find(' ');
-
-    if (first_weapon_end != std::string::npos)
-    {
-      std::string weapon1 = message.substr(0, first_weapon_end);
-      std::string weapon2 = RemoveStartingWhitespace(message.substr(first_weapon_end));
-
-      std::string compare_url = GetCompareWeapon(weapon1.c_str(), weapon2.c_str());
-
-      if (!compare_url.empty())
-      {
-        bot_->SendMessage(msg_data.data.channel, "Weapon Compare info: " + compare_url);
-        return true;
-      }
-    }
-  }
-
-  return false;
-}
-
-bool IRCBotController::HandleSong(PrivateMessageData const& msg_data) const
-{
-  if (match_str(msg_data.message.c_str(), SONG.c_str()))
-  {
-    // Move down "song";
-    std::string message = RemoveStartingWhitespace(msg_data.message.substr(SONG.size()));
-
-    if (!msg_data.data.lastfm_username.empty())
-    {
-      SongInfo song_info = last_song_.GetCurrentPlayingSong(msg_data.data.lastfm_username);
-
-      if (!song_info.artist.empty() && !song_info.title.empty())
-      {
-        bot_->SendMessage(msg_data.data.channel, song_info.title + " by " + song_info.artist);
-        return true;
-      }
-    }
-  }
-
-  return false;
-}
-
-bool IRCBotController::HandleFib(PrivateMessageData const& msg_data) const
-{
-  if (match_str(msg_data.message.c_str(), FIB.c_str()))
-  {
-    // Move down "fib";
-    std::string message = RemoveStartingWhitespace(msg_data.message.substr(FIB.size()));
-
-    if (!message.empty())
-    {
-      uint64_t n = TypeConverter<std::string, uint64_t>(message);
-      if (n > 0)
-      {
-        std::string fib_str = TypeConverter<uint64_t, std::string>(fib(n));
-        bot_->SendMessage(msg_data.data.channel, "Fib(" + message + ") = " + fib_str);
-        return true;
-      }
-    }
-  }
-
-  return false;
+  return loaded_controller_.RemoveCustomCommand(channel, user_input);
 }
 
 void IRCBotController::StartBot()

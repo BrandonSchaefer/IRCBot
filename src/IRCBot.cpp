@@ -125,7 +125,7 @@ void IRCBot::StartMainServerLoop()
     buf[numbytes] = '\0';
 
     // Handle the PING/PONG internally
-    if (match_str(buf, "PING"))
+    if (SubStringMatch(std::string(buf), "PING"))
     {
       std::string pong(buf);
       size_t i_pos = pong.find('I');

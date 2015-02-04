@@ -81,34 +81,6 @@ std::string ReadInFile(char const* path)
   return str;
 }
 
-std::vector<std::string> SplitStringOnNewLineOrNull(std::string const& str)
-{
-  std::vector<std::string> split_str;
-
-  std::string new_str;
-  for (auto const& c : str)
-  {
-    if (c != '\n' && c != '\0')
-    {
-      new_str += c;
-    }
-    else
-    {
-      new_str = RemoveStartingWhitespace(new_str);
-      split_str.push_back(new_str);
-      new_str.clear();
-    }
-  }
-
-  if (!new_str.empty())
-  {
-    new_str = RemoveStartingWhitespace(new_str);
-    split_str.push_back(new_str);
-  }
-
-  return split_str;
-}
-
 std::vector<std::string> SplitString(std::string const& str, std::string const& delims)
 {
   std::vector<std::string> split_str;
@@ -137,9 +109,15 @@ std::vector<std::string> SplitString(std::string const& str, std::string const& 
   return split_str;
 }
 
-bool match_str(const char* buffer, const char* match)
+bool SubStringMatch(std::string const& haystack, std::string const& needle)
 {
-  return strstr(buffer, match) != '\0';
+  return strstr(haystack.c_str(), needle.c_str()) != '\0';
 }
+
+std::string RemoveMatchingWord(std::string const& user_input, std::string const& match)
+{
+  return RemoveStartingWhitespace(user_input.substr(match.size()));
+}
+
 
 } // namespace irc_bot

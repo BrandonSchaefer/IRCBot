@@ -41,3 +41,10 @@ Saving:
 Loading:
   Load SAVESDIR/channel, if that file does not exists check, SAVESDIR/channel_tmp. If that
   does not exists we are done.
+
+
+* Command Handler
+  - Fill in informations:
+    -- username
+    -- message
+    -- loaded_channel

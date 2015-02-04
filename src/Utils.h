@@ -29,13 +29,13 @@ namespace irc_bot
 {
 
 extern std::string RemoveStartingWhitespace(std::string const& str);
-// FIXME Remove the OnNewLine/OrNull function
-extern std::vector<std::string> SplitStringOnNewLineOrNull(std::string const& str);
 extern std::vector<std::string> SplitString(std::string const& str, std::string const& delims);
 
 extern void WriteToFile(std::string const& raw_info, char const* path);
 extern std::string ReadInFile(char const* path);
-extern bool match_str(const char* buffer, const char* match);
+
+extern bool SubStringMatch(std::string const& haystack, std::string const& needle);
+std::string RemoveMatchingWord(std::string const& user_input, std::string const& match);
 
 template<typename I, typename O>
 O TypeConverter(I const& i)

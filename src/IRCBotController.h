@@ -20,9 +20,9 @@
 #define I_R_C_BOT_CONTROLLER_H
 
 #include "CommandBreed.h"
+#include "CommandHandler.h"
 #include "IRCBot.h"
 #include "IRCBotOffline.h"
-#include "LastFMCurrentSong.h"
 #include "LoadedChannelController.h"
 
 #include <set>
@@ -52,23 +52,14 @@ private:
   void HandlePrivMsg(std::string const& server_data);
   void HandleMode(std::string const& server_data);
 
-  bool HandleBasic  (PrivateMessageData const& msg_data) const;
-  bool HandleStats  (PrivateMessageData const& msg_data) const;
-  bool HandleCompare(PrivateMessageData const& msg_data) const;
-  bool HandleSong   (PrivateMessageData const& msg_data) const;
-  bool HandleFib    (PrivateMessageData const& msg_data) const;
-
-  bool UserHasPermissionsForCommand(PrivateMessageData const& msg_data,
-                                    CommandPerm const& perm) const;
-
-  bool CheckBasicCommands(std::vector<CommandBreed> const& commands,
-                          PrivateMessageData const& msg_data) const;
+  bool HandleCustom(std::string const& channel, std::string const& user_input);
+  bool HandleRemove(std::string const& channel, std::string const& user_input);
 
   std::vector<CommandBreed> basic_commands_;
-  LastFMCurrentSong last_song_;
   IRCBot::Ptr bot_;
   LoadedChannelController loaded_controller_;
-  std::unordered_map<std::string, std::set<std::string>> channel_mods_;
+
+  CommandHandler command_handler_;
 };
 
 } // namespace irc_bot

@@ -166,13 +166,13 @@ std::string GetWeapon(std::string const& search_weapon)
     std::string l_weapon = weapon;
     std::transform(l_weapon.begin(), l_weapon.end(), l_weapon.begin(), ::tolower);
 
-    if (match_str(l_weapon.c_str(), l_search_weapon.c_str()))
+    if (SubStringMatch(l_weapon, l_search_weapon))
       return weapon;
 
     // Case2
     std::string no_dash_underscore_weapon = RemoveUnderscoresAndDashes(l_weapon);
 
-    if (match_str(no_dash_underscore_weapon.c_str(), l_search_weapon.c_str()))
+    if (SubStringMatch(no_dash_underscore_weapon, l_search_weapon))
       return weapon;
 
   }

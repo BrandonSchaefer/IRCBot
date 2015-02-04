@@ -156,13 +156,13 @@ LoadedChannelData LoadChannelData(std::string const& channel)
 
   if (!raw_channel_data.empty())
   {
-    std::vector<std::string> split_channel_data = SplitStringOnNewLineOrNull(raw_channel_data);
+    std::vector<std::string> split_channel_data = SplitString(raw_channel_data, "\n\0");
 
     for (auto const& line : split_channel_data)
     {
-      if (match_str(line.c_str(), LASTFM_USERNAME.c_str()))
+      if (SubStringMatch(line, LASTFM_USERNAME))
         data.lastfm_username = GetLastFMUsername(line);
-      if (match_str(line.c_str(), MOD_LIST.c_str()))
+      else if (SubStringMatch(line, MOD_LIST))
         data.mod_list = GetModsList(line);
     }
 

@@ -55,7 +55,7 @@ void LoadedChannelController::AddCustomCommand(std::string const& channel, Comma
   }
 }
 
-void LoadedChannelController::RemoveCustomCommand(std::string const& channel, std::string const& match_str)
+bool LoadedChannelController::RemoveCustomCommand(std::string const& channel, std::string const& match_str)
 {
   LoadedChannelData channel_data = RequestChannelData(channel);
   int index_to_remove = -1;
@@ -72,11 +72,13 @@ void LoadedChannelController::RemoveCustomCommand(std::string const& channel, st
     i++;
   }
 
-  if (index_to_remove > 0)
+  if (index_to_remove >= 0)
   {
     channel_data.custom_commands.erase(channel_data.custom_commands.begin() + index_to_remove);
     UpdateChannelData(channel_data);
   }
+
+  return index_to_remove >= 0;
 }
 
 void LoadedChannelController::UpdateChannelData(LoadedChannelData const& channel_data)

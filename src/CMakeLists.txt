@@ -8,6 +8,7 @@ pkg_check_modules(IRC_BOT REQUIRED ${IRC_BOT_REQUIRED})
 
 set (IRC_BOT_LOADER_SRC
      ChannelIO.cpp
+     CommandHandler.cpp
      IRCBot.cpp
      IRCBotOffline.cpp
      IRCBotController.cpp
@@ -22,6 +23,7 @@ set (IRC_BOT_LOADER_SRC
 set (IRC_BOT_LOADER_HDR
      ChannelIO.h
      CommandBreed.h
+     CommandHandler.h
      IRCBot.h
      IRCBotOffline.h
      IRCBotController.h

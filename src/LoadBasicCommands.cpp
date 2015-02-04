@@ -98,7 +98,7 @@ static std::vector<CommandBreed> ConstructBasicCommands(std::string const& raw_b
 {
   std::vector<CommandBreed> commands;
 
-  std::vector<std::string> basic_commands = SplitStringOnNewLineOrNull(raw_basic_commands);
+  std::vector<std::string> basic_commands = SplitString(raw_basic_commands, "\n\0");
 
   for (auto const& raw_command : basic_commands)
   {
