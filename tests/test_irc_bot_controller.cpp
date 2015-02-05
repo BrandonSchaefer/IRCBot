@@ -55,25 +55,25 @@ public:
 TEST_F(MockIRCBotController, TestSendPrivateMessage)
 {
   EXPECT_CALL(*bot_, SendMessage(CHANNEL, testing::_));
-  bot_->data_received(PRIV_MSG + "!***");
+  bot_->input_received(PRIV_MSG + "!***");
 }
 
 TEST_F(MockIRCBotController, TestSendPrivateMessageStats)
 {
   EXPECT_CALL(*bot_, SendMessage(CHANNEL, testing::_));
-  bot_->data_received(PRIV_MSG + STAT_MSG);
+  bot_->input_received(PRIV_MSG + STAT_MSG);
 }
 
 TEST_F(MockIRCBotController, TestSendPrivateMessageCompare)
 {
   EXPECT_CALL(*bot_, SendMessage(CHANNEL, testing::_));
-  bot_->data_received(PRIV_MSG + COMP_MSG);
+  bot_->input_received(PRIV_MSG + COMP_MSG);
 }
 
 TEST_F(MockIRCBotController, TestSendPrivateMessageFib)
 {
   EXPECT_CALL(*bot_, SendMessage(CHANNEL, testing::_));
-  bot_->data_received(PRIV_MSG + FIB_MSG);
+  bot_->input_received(PRIV_MSG + FIB_MSG);
 }
 
 } // namespace irc_bot

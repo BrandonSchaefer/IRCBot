@@ -115,15 +115,22 @@ void SaveChannelData(LoadedChannelData const& data)
   std::stringstream ss;
 
   // LastFM username
-  ss << LASTFM_USERNAME;
-  ss << " " << data.lastfm_username << "\n";
+  if (!data.lastfm_username.empty())
+  {
+    ss << LASTFM_USERNAME;
+    ss << " " << data.lastfm_username << "\n";
+  }
 
   // Mods list
-  ss << GenerateModString(data);
+  if (!data.mod_list.empty())
+    ss << GenerateModString(data);
 
   // Custom Commands
-  for (auto const& cb : data.custom_commands)
-    ss << cb.perm << " " << cb.match << " " << cb.return_str << "\n";
+  if (!data.custom_commands.empty())
+  {
+    for (auto const& cb : data.custom_commands)
+      ss << cb.perm << " " << cb.match << " " << cb.return_str << "\n";
+  }
 
   WriteToFile(ss.str(), (DEFAULT_PATH + data.channel).c_str());
   WriteToFile(ss.str(), GetBackupFileName(data.channel).c_str());

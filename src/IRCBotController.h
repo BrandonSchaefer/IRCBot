@@ -23,7 +23,6 @@
 #include "CommandHandler.h"
 #include "IRCBot.h"
 #include "IRCBotOffline.h"
-#include "LoadedChannelController.h"
 
 #include <set>
 #include <vector>
@@ -31,13 +30,6 @@
 
 namespace irc_bot
 {
-
-struct PrivateMessageData
-{
-  std::string username;
-  std::string message;
-  LoadedChannelData data;
-};
 
 class IRCBotController
 {
@@ -47,17 +39,14 @@ public:
   void StartBot();
 
 private:
-  void RecvDataRecived(std::string const& data);
+  void RecvServerInputRecived(std::string const& server_input);
+  void RecvCommandReturnMessage(std::string const& channel, std::string const& message_for_bot);
 
-  void HandlePrivMsg(std::string const& server_data);
-  void HandleMode(std::string const& server_data);
-
-  bool HandleCustom(std::string const& channel, std::string const& user_input);
-  bool HandleRemove(std::string const& channel, std::string const& user_input);
+  void HandlePrivMsg(std::string const& server_input);
+  void HandleMode   (std::string const& server_input);
 
   std::vector<CommandBreed> basic_commands_;
   IRCBot::Ptr bot_;
-  LoadedChannelController loaded_controller_;
 
   CommandHandler command_handler_;
 };

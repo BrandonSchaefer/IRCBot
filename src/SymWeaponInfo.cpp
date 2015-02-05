@@ -157,24 +157,27 @@ case 2: Remove all _/-, and check for a sub str match
 */
 std::string GetWeapon(std::string const& search_weapon)
 {
-  std::string l_search_weapon = search_weapon;
-  std::transform(l_search_weapon.begin(), l_search_weapon.end(), l_search_weapon.begin(), ::tolower);
-
-  for (auto const& weapon : WEAPON_INFO)
+  if (!search_weapon.empty())
   {
-    // Case1
-    std::string l_weapon = weapon;
-    std::transform(l_weapon.begin(), l_weapon.end(), l_weapon.begin(), ::tolower);
+    std::string l_search_weapon = search_weapon;
+    std::transform(l_search_weapon.begin(), l_search_weapon.end(), l_search_weapon.begin(), ::tolower);
 
-    if (SubStringMatch(l_weapon, l_search_weapon))
-      return weapon;
+    for (auto const& weapon : WEAPON_INFO)
+    {
+      // Case1
+      std::string l_weapon = weapon;
+      std::transform(l_weapon.begin(), l_weapon.end(), l_weapon.begin(), ::tolower);
 
-    // Case2
-    std::string no_dash_underscore_weapon = RemoveUnderscoresAndDashes(l_weapon);
+      if (SubStringMatch(l_weapon, l_search_weapon))
+        return weapon;
 
-    if (SubStringMatch(no_dash_underscore_weapon, l_search_weapon))
-      return weapon;
+      // Case2
+      std::string no_dash_underscore_weapon = RemoveUnderscoresAndDashes(l_weapon);
 
+      if (SubStringMatch(no_dash_underscore_weapon, l_search_weapon))
+        return weapon;
+
+    }
   }
 
   return "";

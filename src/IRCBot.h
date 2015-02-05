@@ -50,7 +50,7 @@ public:
 
   // FIXME Make this private
   // when emited, means we have received a raw_buffer from the server
-  std::function<void(std::string const&)> data_received;
+  std::function<void(std::string const&)> input_received;
 
 private:
   bool ConnectToIRCServer();

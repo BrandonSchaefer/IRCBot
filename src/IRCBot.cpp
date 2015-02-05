@@ -137,7 +137,7 @@ void IRCBot::StartMainServerLoop()
     }
     else
     {
-      data_received(std::string(buf));
+      input_received(std::string(buf));
     }
 
     if (numbytes <= 0)

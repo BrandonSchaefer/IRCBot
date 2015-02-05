@@ -119,5 +119,4 @@ std::string RemoveMatchingWord(std::string const& user_input, std::string const&
   return RemoveStartingWhitespace(user_input.substr(match.size()));
 }
 
-
 } // namespace irc_bot

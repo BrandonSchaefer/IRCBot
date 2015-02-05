@@ -26,11 +26,27 @@ namespace irc_bot
 
 namespace
 {
+  std::string const GOOGLE_URL = "http://google.com/#q=";
+
   // CONST COMMANDS
   std::string const STATS   = "stats";
   std::string const COMPARE = "compare";
   std::string const SONG    = "song";
+  std::string const CUSTOM  = "custom";
+  std::string const REMOVE  = "remove";
+  std::string const GOOGLE  = "google";
   std::string const FIB     = "fib";
+}
+
+static std::string GetChannel(std::string const& str)
+{
+  size_t start_of_channel = str.find('#');
+  size_t end_of_channel   = str.find(' ', start_of_channel);
+
+  if (start_of_channel != std::string::npos && end_of_channel != std::string::npos)
+    return RemoveStartingWhitespace(str.substr(start_of_channel, end_of_channel - start_of_channel));
+
+  return "";
 }
 
 CommandHandler::CommandHandler()
@@ -43,33 +59,60 @@ void CommandHandler::SetUsername(std::string const& username)
   username_ = username;
 }
 
-void CommandHandler::SetLoadedChannel(LoadedChannelData const& loaded_channel)
+void CommandHandler::UpdateLoadedChannel(std::string const& server_input)
 {
-  loaded_channel_ = loaded_channel;
+  std::string const channel = GetChannel(server_input);
+  loaded_channel_ = loaded_controller_.RequestChannelData(channel);
 }
 
-std::string CommandHandler::HandleUserInput(std::string const& user_input)
+// :jtv MODE #colossusofc1out +o thegreatbambibot
+void CommandHandler::HandleModServerCommand(std::string const& server_input)
 {
+  loaded_channel_.mod_list.insert(username_);
+  loaded_controller_.UpdateChannelData(loaded_channel_);
+}
+
+bool CommandHandler::HandleUserInput(std::string const& user_input)
+{
+  std::string message_for_bot;
+
   if (SubStringMatch(user_input, STATS))
   {
-    return HandleStats(RemoveMatchingWord(user_input, STATS));
+    message_for_bot = HandleStats(RemoveMatchingWord(user_input, STATS));
   }
   else if (SubStringMatch(user_input, COMPARE))
   {
-    return HandleCompare(RemoveMatchingWord(user_input, COMPARE));
+    message_for_bot = HandleCompare(RemoveMatchingWord(user_input, COMPARE));
   }
   else if (SubStringMatch(user_input, SONG))
   {
-    return HandleSong(RemoveMatchingWord(user_input, SONG));
+    message_for_bot = HandleSong(RemoveMatchingWord(user_input, SONG));
   }
   else if (SubStringMatch(user_input, FIB))
   {
-    return HandleFib(RemoveMatchingWord(user_input, FIB));
+    message_for_bot = HandleFib(RemoveMatchingWord(user_input, FIB));
+  }
+  else if (SubStringMatch(user_input, GOOGLE))
+  {
+    message_for_bot = HandleGoogle(RemoveMatchingWord(user_input, GOOGLE));
+  }
+  else if (SubStringMatch(user_input, CUSTOM))
+  {
+    return HandleCustom(RemoveMatchingWord(user_input, CUSTOM));
+  }
+  else if (SubStringMatch(user_input, REMOVE))
+  {
+    return HandleRemove(RemoveMatchingWord(user_input, REMOVE));
   }
   else
   {
-    return HandleBasic(user_input);
+    message_for_bot = HandleBasic(user_input);
   }
+
+  if (!message_for_bot.empty())
+    command_return_message(loaded_channel_.channel, message_for_bot);
+
+  return !message_for_bot.empty();
 }
 
 bool CommandHandler::UserHasPermissionsForCommand(CommandPerm const& perm) const
@@ -138,6 +181,14 @@ std::string CommandHandler::HandleCompare(std::string const& user_input) const
   return "";
 }
 
+std::string CommandHandler::HandleGoogle(std::string const& user_input) const
+{
+  if (UserHasPermissionsForCommand(CommandPerm::MOD))
+    return GOOGLE_URL + user_input;
+
+  return "";
+}
+
 std::string CommandHandler::HandleSong(std::string const& user_input) const
 {
   if (!loaded_channel_.lastfm_username.empty())
@@ -149,6 +200,30 @@ std::string CommandHandler::HandleSong(std::string const& user_input) const
   }
 
   return "";
+}
+
+bool CommandHandler::HandleCustom(std::string const& user_input)
+{
+  if (UserHasPermissionsForCommand(CommandPerm::MOD))
+  {
+    CommandBreed cb = LoadSingleCommandFromString(user_input);
+
+    if (!cb.match.empty())
+    {
+      loaded_controller_.AddCustomCommand(loaded_channel_.channel, cb);
+      return true;
+    }
+  }
+
+  return false;
+}
+
+bool CommandHandler::HandleRemove(std::string const& user_input)
+{
+  if (UserHasPermissionsForCommand(CommandPerm::MOD))
+    return loaded_controller_.RemoveCustomCommand(loaded_channel_.channel, user_input);
+
+  return false;
 }
 
 // Recursion is to slow ... iterative it is :(

@@ -63,12 +63,12 @@ void IRCBotOffline::StartMainServerLoop()
 {
   char buf[MAX_BUFF];
 
-  data_received(":jtv MODE #test +o thegreatbambibot\r\n");
+  input_received(":jtv MODE #test +o thegreatbambibot\r\n");
 
   while (fgets(buf, MAX_BUFF, stdin) != (char*)EOF)
   {
     std::string data = ":TheGreatBambiBot!test@192.168.0.1 PRIVMSG #test :" + std::string(buf);
-    data_received(data);
+    input_received(data);
   }
 }
 
