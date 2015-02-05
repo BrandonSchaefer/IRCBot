@@ -42,8 +42,8 @@ namespace
 
 int main()
 {
-  irc_bot::IRCBot::Ptr bot = std::make_shared<irc_bot::IRCBotOffline>(INFO);
-  //irc_bot::IRCBot::Ptr bot = std::make_shared<irc_bot::IRCBot>(INFO);
+  //irc_bot::IRCBot::Ptr bot = std::make_shared<irc_bot::IRCBotOffline>(INFO);
+  irc_bot::IRCBot::Ptr bot = std::make_shared<irc_bot::IRCBot>(INFO);
 
   irc_bot::IRCBotController bot_controller(bot);
 

@@ -35,7 +35,7 @@ extern void WriteToFile(std::string const& raw_info, char const* path);
 extern std::string ReadInFile(char const* path);
 
 extern bool SubStringMatch(std::string const& haystack, std::string const& needle);
-std::string RemoveMatchingWord(std::string const& user_input, std::string const& match);
+extern std::string RemoveMatchingWord(std::string const& user_input, std::string const& match);
 
 template<typename I, typename O>
 O TypeConverter(I const& i)

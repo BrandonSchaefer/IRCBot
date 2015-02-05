@@ -83,8 +83,11 @@ bool LoadedChannelController::RemoveCustomCommand(std::string const& channel, st
 
 void LoadedChannelController::UpdateChannelData(LoadedChannelData const& channel_data)
 {
-  loaded_channel_data_[channel_data.channel] = channel_data;
-  SaveChannelData(channel_data);
+  if (!channel_data.channel.empty())
+  {
+    loaded_channel_data_[channel_data.channel] = channel_data;
+    SaveChannelData(channel_data);
+  }
 }
 
 LoadedChannelData LoadedChannelController::RequestChannelData(std::string const& channel)

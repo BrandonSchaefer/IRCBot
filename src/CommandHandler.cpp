@@ -42,17 +42,30 @@ namespace
 
   // TO REPLACE KEYWORDS
   std::string const SYMBOL_USER = "#user";
+
+  std::string const POS_MOD_OP = "+o";
+  std::string const NEG_MOD_OP = "-o";
 }
 
 static std::string GetChannel(std::string const& str)
 {
+  std::string channel;
   size_t start_of_channel = str.find('#');
-  size_t end_of_channel   = str.find(' ', start_of_channel);
 
-  if (start_of_channel != std::string::npos && end_of_channel != std::string::npos)
-    return RemoveStartingWhitespace(str.substr(start_of_channel, end_of_channel - start_of_channel));
+  if (start_of_channel != std::string::npos)
+  {
+    std::string chunk = str.substr(start_of_channel);
 
-  return "";
+    for (auto const& c : chunk)
+    {
+      if (c != '\n' && c != '\0' && c != '\r' && c != ' ')
+        channel += c;
+      else
+        break;
+    }
+  }
+
+  return channel;
 }
 
 CommandHandler::CommandHandler()
@@ -68,13 +81,26 @@ void CommandHandler::SetUsername(std::string const& username)
 void CommandHandler::UpdateLoadedChannel(std::string const& server_input)
 {
   std::string const channel = GetChannel(server_input);
-  loaded_channel_ = loaded_controller_.RequestChannelData(channel);
+  if (!channel.empty())
+    loaded_channel_ = loaded_controller_.RequestChannelData(channel);
 }
 
-// :jtv MODE #colossusofc1out +o thegreatbambibot
 void CommandHandler::HandleModServerCommand(std::string const& server_input)
 {
-  loaded_channel_.mod_list.insert(username_);
+  std::vector<std::string> raw_server_mode_list = SplitString(server_input, " \r\n");
+
+  for (size_t i = 0; i < raw_server_mode_list.size(); i++)
+  {
+    if (raw_server_mode_list[i] == POS_MOD_OP)
+    {
+      loaded_channel_.mod_list.insert(raw_server_mode_list[i + 1]);
+    }
+    else if(raw_server_mode_list[i] == NEG_MOD_OP)
+    {
+      loaded_channel_.mod_list.erase(raw_server_mode_list[i + 1]);
+    }
+  }
+
   loaded_controller_.UpdateChannelData(loaded_channel_);
 }
 
@@ -138,15 +164,20 @@ bool CommandHandler::HandleUserInput(std::string const& user_input)
   }
   else if (SubStringMatch(user_input, BOT_LEAVE))
   {
-    bot_leave_channel("#" + username_);
-    return true;
+    if (bot_leave_channel)
+    {
+      bot_leave_channel("#" + username_);
+      return true;
+    }
+
+    return false;
   }
   else
   {
     message_for_bot = HandleBasic(user_input);
   }
 
-  if (!message_for_bot.empty())
+  if (!message_for_bot.empty() && command_return_message)
   {
     message_for_bot = ReplaceSymbols(message_for_bot);
     command_return_message(loaded_channel_.channel, message_for_bot);
@@ -166,9 +197,14 @@ bool CommandHandler::UserHasPermissionsForCommand(CommandPerm const& perm) const
       if (mod == username_)
         return true;
 
-  // Check if its the owner, so skip the '#'
-  std::string channel_owner = loaded_channel_.channel.substr(1);
-  return username_ == channel_owner;
+  if (!loaded_channel_.channel.empty())
+  {
+    // Check if its the owner, so skip the '#'
+    std::string channel_owner = loaded_channel_.channel.substr(1);
+    return username_ == channel_owner;
+  }
+
+  return false;
 }
 
 std::string CommandHandler::CheckBasicCommands(std::vector<CommandBreed> const& commands,

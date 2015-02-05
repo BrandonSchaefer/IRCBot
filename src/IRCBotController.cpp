@@ -88,12 +88,12 @@ void IRCBotController::RecvServerInputRecived(std::string const& server_input)
   std::string formated_server_input = server_input;
   formated_server_input.erase(formated_server_input.find_last_not_of("\n\r\t")+1);
 
+  printf(".%s.\n", formated_server_input.c_str());
+
   if (SubStringMatch(formated_server_input, PRIVMSG))
     HandlePrivMsg(formated_server_input);
   else if (SubStringMatch(formated_server_input, MODE))
     HandleMode(formated_server_input);
-
-  printf(".%s.\n", formated_server_input.c_str());
 }
 
 void IRCBotController::HandleMode(std::string const& server_input)

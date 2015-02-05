@@ -121,7 +121,7 @@ void IRCBot::SendMessage(std::string const& channel, std::string const& message)
 
 std::string IRCBot::Name() const
 {
-  std::string formated_name = info_.nick;;
+  std::string formated_name = info_.nick;
   formated_name.erase(formated_name.find_last_not_of("\n\r\t")+1);
 
   return formated_name;

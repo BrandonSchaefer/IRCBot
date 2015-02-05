@@ -58,6 +58,7 @@ if (GTEST_SRC_DIR AND
       )
 
   set (GTEST_BACKEND_SOURCE
+       test_command_handler.cpp
        test_irc_bot_controller.cpp
        test_load_basic_commands.cpp
        test_sym_weapons.cpp
@@ -69,7 +70,7 @@ if (GTEST_SRC_DIR AND
   add_executable        (gtest_irc_bot ${GTEST_BACKEND_SOURCE})
   target_link_libraries (gtest_irc_bot irc_bot_lib -lcurl ${GTEST_GMOCK_LIB})
 
-  add_custom_target (check COMMAND gtest_irc_bot)
+  add_custom_target (check COMMAND make -j4 COMMAND gtest_irc_bot)
 
 endif (GTEST_SRC_DIR AND
        GMOCK_LIB AND
