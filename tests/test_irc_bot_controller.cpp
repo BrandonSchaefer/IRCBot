@@ -55,7 +55,7 @@ public:
 TEST_F(MockIRCBotController, TestSendPrivateMessage)
 {
   EXPECT_CALL(*bot_, SendMessage(CHANNEL, testing::_));
-  bot_->input_received(PRIV_MSG + "!***");
+  bot_->input_received(PRIV_MSG + "!help");
 }
 
 TEST_F(MockIRCBotController, TestSendPrivateMessageStats)

@@ -42,10 +42,13 @@ public:
 
   IRCBot(ServerInfo const& info);
 
+  std::string Name() const;
+
   virtual bool ConnectToServer();
   virtual void StartMainServerLoop();
 
-  virtual void JoinChannel(std::string const& channel) const;
+  virtual void JoinChannel (std::string const& channel) const;
+  virtual void LeaveChannel(std::string const& channel) const;
   virtual void SendMessage(std::string const& channel, std::string const& message) const;
 
   // FIXME Make this private

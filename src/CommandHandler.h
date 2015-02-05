@@ -42,22 +42,30 @@ public:
   bool HandleUserInput(std::string const& user_input);
 
   std::function<void(std::string const&, std::string const&)> command_return_message;
+  std::function<void(std::string const&)> bot_leave_channel;
 
 private:
-  std::string HandleBasic  (std::string const& user_input) const;
-  std::string HandleStats  (std::string const& user_input) const;
-  std::string HandleCompare(std::string const& user_input) const;
-  std::string HandleSong   (std::string const& user_input) const;
-  std::string HandleGoogle (std::string const& user_input) const;
-  std::string HandleFib    (std::string const& user_input) const;
+  // Read commands
+  std::string HandleBasic   (std::string const& user_input) const;
+  std::string HandleStats   (std::string const& user_input) const;
+  std::string HandleCompare (std::string const& user_input) const;
+  std::string HandleSong    (std::string const& user_input) const;
+  std::string HandleGoogle  (std::string const& user_input) const;
+  std::string HandleFib     (std::string const& user_input) const;
+  std::string HandleHelp    (std::string const& user_input) const;
 
-  bool HandleCustom(std::string const& user_input);
-  bool HandleRemove(std::string const& user_input);
+  // Write commands
+  void HandleSetLastFM(std::string const& user_input);
+  bool HandleCustom   (std::string const& user_input);
+  bool HandleRemove   (std::string const& user_input);
 
   bool UserHasPermissionsForCommand(CommandPerm const& perm) const;
 
   std::string CheckBasicCommands(std::vector<CommandBreed> const& commands,
                                  std::string const& user_input) const;
+
+  // Replaces speical symbols such as #user with the user of the calling command
+  std::string ReplaceSymbols(std::string const& message) const;
 
   std::vector<CommandBreed> basic_commands_;
   LastFMCurrentSong last_song_;

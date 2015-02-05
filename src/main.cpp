@@ -25,9 +25,10 @@ namespace
 {
   // Server Info
   std::string const SERVER   = "irc.twitch.tv";
+  //std::string const SERVER   = "irc.freenode.net";
   std::string const PORT     = "6667";
   // FIXME Figure out how to correctly store this password...plain test == BAD BAD FUCKING BAD (hello!)
-  std::string const PASSWORD = ""; // FIXME TODO REMOVE ME BEFORE COMMITS!
+  std::string const PASSWORD = "\r\n"; // FIXME TODO REMOVE ME BEFORE COMMITS!
   std::string const NICK     = "TheGreatBambiBot\r\n";
   std::string const USER     = "TheGreateBambiBot nothing here :Real Name\r\n";
 

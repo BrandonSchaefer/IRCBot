@@ -67,7 +67,7 @@ void IRCBotOffline::StartMainServerLoop()
 
   while (fgets(buf, MAX_BUFF, stdin) != (char*)EOF)
   {
-    std::string data = ":TheGreatBambiBot!test@192.168.0.1 PRIVMSG #test :" + std::string(buf);
+    std::string data = ":TheGreatBambiBot!test@192.168.0.1 PRIVMSG #thegreatbambibot :" + std::string(buf);
     input_received(data);
   }
 }

@@ -41,6 +41,7 @@ public:
 private:
   void RecvServerInputRecived(std::string const& server_input);
   void RecvCommandReturnMessage(std::string const& channel, std::string const& message_for_bot);
+  void RecvBotLeaveChannel (std::string const& channel);
 
   void HandlePrivMsg(std::string const& server_input);
   void HandleMode   (std::string const& server_input);

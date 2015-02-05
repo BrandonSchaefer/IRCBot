@@ -107,10 +107,24 @@ void IRCBot::JoinChannel(std::string const& channel) const
   SendData(message);
 }
 
+void IRCBot::LeaveChannel(std::string const& channel) const
+{
+  std::string message = "PART " + channel + "\r\n";
+  SendData(message);
+}
+
 void IRCBot::SendMessage(std::string const& channel, std::string const& message) const
 {
   std::string priv_message = "PRIVMSG " + channel + " :" + message + "\r\n";
   SendData(priv_message);
+}
+
+std::string IRCBot::Name() const
+{
+  std::string formated_name = info_.nick;;
+  formated_name.erase(formated_name.find_last_not_of("\n\r\t")+1);
+
+  return formated_name;
 }
 
 void IRCBot::StartMainServerLoop()

@@ -33,6 +33,9 @@ namespace
   std::string const PRIVMSG = "PRIVMSG";
   std::string const MODE    = "MODE";
 
+  // BOT SPECIFIC COMMANDS ONLY
+  std::string const BOT_JOIN = "bot join";
+
   std::string const CHANNEL = "#colossusofc1out,#thegreatbambibot";
 }
 
@@ -65,6 +68,14 @@ IRCBotController::IRCBotController(IRCBot::Ptr const& bot)
 
   command_handler_.command_return_message =
     std::bind(&IRCBotController::RecvCommandReturnMessage, this, std::placeholders::_1, std::placeholders::_2);
+
+  command_handler_.bot_leave_channel = std::bind(&IRCBotController::RecvBotLeaveChannel, this, std::placeholders::_1);
+}
+
+void IRCBotController::RecvBotLeaveChannel(std::string const& channel)
+{
+  bot_->SendMessage(channel, "Alright, I'll leave... BibleThump");
+  bot_->LeaveChannel(channel);
 }
 
 void IRCBotController::RecvCommandReturnMessage(std::string const& channel, std::string const& message_for_bot)
@@ -82,7 +93,7 @@ void IRCBotController::RecvServerInputRecived(std::string const& server_input)
   else if (SubStringMatch(formated_server_input, MODE))
     HandleMode(formated_server_input);
 
-  //printf(".%s.\n", new_data.c_str());
+  printf(".%s.\n", formated_server_input.c_str());
 }
 
 void IRCBotController::HandleMode(std::string const& server_input)
@@ -104,16 +115,25 @@ void IRCBotController::HandlePrivMsg(std::string const& server_input)
   if (!message.empty() && message[0] == '!')
   {
     std::string username = GetUsername(server_input);
-    message = RemoveStartingWhitespace(message.substr(1));
-
-    // FIXME this could end up doing something bad...
+    message  = RemoveStartingWhitespace(message.substr(1));
     username = lowercase(username);
-    message  = lowercase(message);
 
     command_handler_.SetUsername(username);
     command_handler_.UpdateLoadedChannel(server_input);
 
-    if (!command_handler_.HandleUserInput(message))
+    bool handled = command_handler_.HandleUserInput(message);
+
+    // FIXME clean me up
+    std::string bot_channel = "#" + lowercase(bot_->Name());
+    if (SubStringMatch(message, BOT_JOIN) && SubStringMatch(server_input, bot_channel))
+    {
+      bot_->SendMessage(bot_channel, "Joinning channel: http://www.twitch.tv/" + username);
+      bot_->JoinChannel("#" + username);
+      bot_->SendMessage("#" + username, "Hello, " + bot_->Name() + " has entered the room.");
+      handled = true;
+    }
+
+    if (!handled)
       fprintf(stderr, "Failed to find a command for: %s\n", message.c_str());
   }
 }
