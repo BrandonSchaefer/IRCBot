@@ -17,12 +17,15 @@ Windows:
 
 Commands, all start with ! (ex. !fib 3):
 
-    stats   <weapon>
-    compare <weapon> <weapon>
-    custom  <perm> <match> <return_str>
-    remove  <match>
-    fib     <n>
-    google  <search_str>
+    stats      <weapon>
+    compare    <weapon> <weapon>
+    custom     <perm> <match> <return_str>
+    remove     <match>
+    fib        <n>
+    google     <search_str>
+    set lastfm <username>
     song
+    bot join
+    bot leave
 
 Custom commands are saved in IRCBots/saves, which is updated per channel that is joined
