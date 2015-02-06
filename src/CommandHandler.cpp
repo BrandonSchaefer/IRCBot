@@ -121,7 +121,7 @@ std::string CommandHandler::ReplaceSymbols(std::string const& message) const
   return message;
 }
 
-bool CommandHandler::HandleUserInput(std::string const& user_input)
+bool CommandHandler::HandleUserInput(IRCBot::Ptr const& bot, std::string const& user_input)
 {
   std::string message_for_bot;
 
@@ -164,23 +164,20 @@ bool CommandHandler::HandleUserInput(std::string const& user_input)
   }
   else if (SubStringMatch(user_input, BOT_LEAVE))
   {
-    if (bot_leave_channel)
-    {
-      bot_leave_channel("#" + username_);
-      return true;
-    }
-
-    return false;
+    std::string usr_channel = "#" + username_;
+    bot->SendMessage (usr_channel, "Alright, I'll leave... BibleThump");
+    bot->LeaveChannel(usr_channel);
+    return true;
   }
   else
   {
     message_for_bot = HandleBasic(user_input);
   }
 
-  if (!message_for_bot.empty() && command_return_message)
+  if (!message_for_bot.empty())
   {
     message_for_bot = ReplaceSymbols(message_for_bot);
-    command_return_message(loaded_channel_.channel, message_for_bot);
+    bot->SendMessage(loaded_channel_.channel, message_for_bot);
   }
 
   return !message_for_bot.empty();

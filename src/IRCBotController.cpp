@@ -65,22 +65,6 @@ IRCBotController::IRCBotController(IRCBot::Ptr const& bot)
     bot_->JoinChannel(CHANNEL);
 
   bot_->input_received = std::bind(&IRCBotController::RecvServerInputRecived, this, std::placeholders::_1);
-
-  command_handler_.command_return_message =
-    std::bind(&IRCBotController::RecvCommandReturnMessage, this, std::placeholders::_1, std::placeholders::_2);
-
-  command_handler_.bot_leave_channel = std::bind(&IRCBotController::RecvBotLeaveChannel, this, std::placeholders::_1);
-}
-
-void IRCBotController::RecvBotLeaveChannel(std::string const& channel)
-{
-  bot_->SendMessage(channel, "Alright, I'll leave... BibleThump");
-  bot_->LeaveChannel(channel);
-}
-
-void IRCBotController::RecvCommandReturnMessage(std::string const& channel, std::string const& message_for_bot)
-{
-  bot_->SendMessage(channel, message_for_bot);
 }
 
 void IRCBotController::RecvServerInputRecived(std::string const& server_input)
@@ -121,7 +105,7 @@ void IRCBotController::HandlePrivMsg(std::string const& server_input)
     command_handler_.SetUsername(username);
     command_handler_.UpdateLoadedChannel(server_input);
 
-    bool handled = command_handler_.HandleUserInput(message);
+    bool handled = command_handler_.HandleUserInput(bot_, message);
 
     // FIXME clean me up
     std::string bot_channel = "#" + lowercase(bot_->Name());

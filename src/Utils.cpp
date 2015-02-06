@@ -64,7 +64,7 @@ std::string ReadInFile(char const* path)
     int length = (int)is.tellg();
     is.seekg(0, is.beg);
 
-    char* buff = new char[length];
+    char* buff = new char[length + 1];
 
     is.read(buff, length);
     is.close();
@@ -72,6 +72,7 @@ std::string ReadInFile(char const* path)
     buff[length] = '\0';
 
     str = std::string(buff);
+    delete buff;
   }
   else
   {

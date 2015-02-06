@@ -23,6 +23,7 @@
 #include <string>
 #include <vector>
 
+#include "IRCBot.h"
 #include "LastFMCurrentSong.h"
 #include "LoadedChannelController.h"
 #include "LoadedChannelData.h"
@@ -39,10 +40,7 @@ public:
   void UpdateLoadedChannel(std::string const& server_input);
 
   void HandleModServerCommand(std::string const& server_input);
-  bool HandleUserInput(std::string const& user_input);
-
-  std::function<void(std::string const&, std::string const&)> command_return_message;
-  std::function<void(std::string const&)> bot_leave_channel;
+  bool HandleUserInput(IRCBot::Ptr const& bot, std::string const& user_input);
 
 private:
   // Read commands
