@@ -20,7 +20,7 @@
 #include <gtest.h>
 
 #include <SymWeaponInfo.cpp>
-#include <Utils.cpp>
+#include <StringManipulation.cpp>
 
 using namespace testing;
 
