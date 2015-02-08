@@ -18,7 +18,6 @@ set (IRC_BOT_LOADER_SRC
      ReadWriteIO.cpp
      StringManipulation.cpp
      SymWeaponInfo.cpp
-     #Utils.cpp
      main.cpp
     )
 
@@ -36,7 +35,6 @@ set (IRC_BOT_LOADER_HDR
      ReadWriteIO.h
      StringManipulation.h
      SymWeaponInfo.h
-     #Utils.h
     )
 
 include_directories (${IRC_BOT_INCLUDE_DIRS} ${CMAKE_BINARY_DIR})
