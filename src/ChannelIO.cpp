@@ -1,5 +1,5 @@
 //-*- Mode: C++; indent-tabs-mode: nil; tab-width: 2 -*-
-/* * Copyright (C) CURRENT_YEAR Brandon Schaefer
+/* * Copyright (C) 2015 Brandon Schaefer
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License version 3 as
@@ -21,7 +21,8 @@
 #include "CommandBreed.h"
 #include "ChannelIO.h"
 #include "LoadBasicCommands.h"
-#include "Utils.h"
+#include "ReadWriteIO.h"
+#include "StringManipulation.h"
 
 #include "config.h"
 
@@ -53,14 +54,14 @@ If a file is found, then split it up on newlines or '\0' into a vector
 */
 static std::string LoadRawChannelData(std::string const& channel)
 {
-  std::string raw_channel_data = ReadInFile((DEFAULT_PATH + channel).c_str());
+  std::string raw_channel_data = ReadInFile(DEFAULT_PATH + channel);
   std::vector<std::string> split_channel_data;
 
   if (raw_channel_data.empty())
   {
     // If we have to use the back up make sure we re-save a real version!
-    raw_channel_data = ReadInFile(GetBackupFileName(channel).c_str());
-    WriteToFile(raw_channel_data, (DEFAULT_PATH + channel).c_str());
+    raw_channel_data = ReadInFile(GetBackupFileName(channel));
+    WriteToFile(raw_channel_data, DEFAULT_PATH + channel);
   }
 
   return raw_channel_data;
@@ -109,7 +110,7 @@ void SaveChannelData(LoadedChannelData const& data)
 {
   // Backup the current file
   std::string raw_channel_data = LoadRawChannelData(data.channel);
-  WriteToFile(raw_channel_data, GetBackupFileName(data.channel).c_str());
+  WriteToFile(raw_channel_data, GetBackupFileName(data.channel));
 
   // Create the new info to be saved!
   std::stringstream ss;
@@ -125,8 +126,8 @@ void SaveChannelData(LoadedChannelData const& data)
   for (auto const& cb : data.custom_commands)
     ss << cb.perm << " " << cb.match << " " << cb.return_str << "\n";
 
-  WriteToFile(ss.str(), (DEFAULT_PATH + data.channel).c_str());
-  WriteToFile(ss.str(), GetBackupFileName(data.channel).c_str());
+  WriteToFile(ss.str(), DEFAULT_PATH + data.channel);
+  WriteToFile(ss.str(), GetBackupFileName(data.channel));
 }
 
 static std::string GetLastFMUsername(std::string const& line)

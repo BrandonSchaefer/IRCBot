@@ -1,5 +1,5 @@
 //-*- Mode: C++; indent-tabs-mode: nil; tab-width: 2 -*-
-/* * Copyright (C) CURRENT_YEAR Brandon Schaefer
+/* * Copyright (C) 2015 Brandon Schaefer
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License version 3 as
@@ -19,10 +19,7 @@
 #include "CommandBreed.h"
 #include "LoadBasicCommands.h"
 #include "IRCBotController.h"
-#include "Utils.h"
-
-#include <algorithm>
-#include <functional>
+#include "StringManipulation.h"
 
 namespace irc_bot
 {
@@ -84,12 +81,6 @@ void IRCBotController::HandleMode(std::string const& server_input)
 {
   command_handler_.UpdateLoadedChannel(server_input);
   command_handler_.HandleModServerCommand(server_input);
-}
-
-std::string lowercase(std::string str)
-{
-  std::transform(str.begin(), str.end(), str.begin(), ::tolower);
-  return str;
 }
 
 void IRCBotController::HandlePrivMsg(std::string const& server_input)

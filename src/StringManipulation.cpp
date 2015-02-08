@@ -16,16 +16,13 @@
 * Authored by: Brandon Schaefer <brandontschaefer@gmail.com>
 */
 
-#include "Utils.h"
-
-#include <fstream>
-#include <string.h>
+#include "StringManipulation.h"
 
 #include <algorithm>
+#include <string.h>
 
 namespace irc_bot
 {
-
 std::string RemoveStartingWhitespace(std::string const& str)
 {
   std::string new_str;

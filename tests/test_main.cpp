@@ -1,5 +1,5 @@
 //-*- Mode: C++; indent-tabs-mode: nil; tab-width: 2 -*-
-/* * Copyright (C) 2013-2014 Brandon Schaefer
+/* * Copyright (C) 2013-2015 Brandon Schaefer
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License version 3 as

@@ -1,5 +1,5 @@
 //-*- Mode: C++; indent-tabs-mode: nil; tab-width: 2 -*-
-/* * Copyright (C) CURRENT_YEAR Brandon Schaefer
+/* * Copyright (C) 2015 Brandon Schaefer
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License version 3 as
@@ -24,9 +24,20 @@
 namespace irc_bot
 {
 
-extern std::string GetWeaponURL    (std::string const& search_weapon);
-extern std::string GetWeapon       (std::string const& search_weapon);
-extern std::string GetCompareWeapon(std::string const& search_weapon1, std::string const& search_weapon2);
+class SymWeaponInfo
+{
+public:
+  SymWeaponInfo();
+  std::string GetWeaponURL    (std::string const& search_weapon) const;
+  std::string GetWeapon       (std::string const& search_weapon) const;
+  std::string GetCompareWeapon(std::string const& search_weapon1,
+                               std::string const& search_weapon2) const;
+private:
+  void LoadInWeaponInfo();
+
+  std::vector<std::string> weapon_info_;
+
+};
 
 } // namespace irc_bot
 

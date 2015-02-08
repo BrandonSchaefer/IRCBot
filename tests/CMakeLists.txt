@@ -61,11 +61,13 @@ if (GTEST_SRC_DIR AND
        test_command_handler.cpp
        test_irc_bot_controller.cpp
        test_load_basic_commands.cpp
+       test_string_manipulation.cpp
        test_sym_weapons.cpp
+       test_read_write_io.cpp
        test_main.cpp
       )
 
-  include_directories (${IRC_BOT_SOURCE_DIR}/src ${GTEST_INCLUDE_DIR})
+  include_directories (${IRC_BOT_SOURCE_DIR}/src ${GTEST_INCLUDE_DIR} ${CMAKE_BINARY_DIR})
 
   add_executable        (gtest_irc_bot ${GTEST_BACKEND_SOURCE})
   target_link_libraries (gtest_irc_bot irc_bot_lib -lcurl ${GTEST_GMOCK_LIB})

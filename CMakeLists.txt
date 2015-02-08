@@ -12,7 +12,8 @@ set (CMAKE_AUTOMOC ON)
 set (CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set (SAVESDIR "${CMAKE_SOURCE_DIR}/saves")
-configure_file (${CMAKE_SOURCE_DIR}/config.h.cmake ${CMAKE_BINARY_DIR}/config.h) 
+set (TESTDIR  "${CMAKE_SOURCE_DIR}/tests")
+configure_file (${CMAKE_SOURCE_DIR}/config.h.cmake ${CMAKE_BINARY_DIR}/config.h)
 
 if(WIN32)
   if(NOT WINDOWS)

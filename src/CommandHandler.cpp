@@ -1,5 +1,5 @@
 //-*- Mode: C++; indent-tabs-mode: nil; tab-width: 2 -*-
-/* * Copyright (C) CURRENT_YEAR Brandon Schaefer
+/* * Copyright (C) 2015 Brandon Schaefer
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License version 3 as
@@ -18,8 +18,7 @@
 
 #include "CommandHandler.h"
 #include "LoadBasicCommands.h"
-#include "SymWeaponInfo.h"
-#include "Utils.h"
+#include "StringManipulation.h"
 
 namespace irc_bot
 {
@@ -113,7 +112,7 @@ std::string CommandHandler::ReplaceSymbols(std::string const& message) const
     if (start != std::string::npos)
     {
       std::string front = message.substr(0, start);
-      std::string end   = message.substr(start + SYMBOL_USER.size()); 
+      std::string end   = message.substr(start + SYMBOL_USER.size());
       return front + username_ + end;
     }
   }
@@ -228,7 +227,7 @@ std::string CommandHandler::HandleBasic(std::string const& user_input) const
 
 std::string CommandHandler::HandleStats(std::string const& user_input) const
 {
-  std::string weapon_url = GetWeaponURL(user_input);
+  std::string weapon_url = sym_weapons_.GetWeaponURL(user_input);
 
   if (!weapon_url.empty())
     return "Weapon info for " + user_input + ": " + weapon_url;
@@ -245,12 +244,12 @@ std::string CommandHandler::HandleCompare(std::string const& user_input) const
     std::string weapon1 = user_input.substr(0, first_weapon_end);
     std::string weapon2 = RemoveStartingWhitespace(user_input.substr(first_weapon_end));
 
-    std::string compare_url = GetCompareWeapon(weapon1.c_str(), weapon2.c_str());
+    std::string compare_url = sym_weapons_.GetCompareWeapon(weapon1.c_str(), weapon2.c_str());
 
     if (!compare_url.empty())
       return "Weapon Compare info: " + compare_url;
   }
- 
+
   return "";
 }
 
@@ -284,6 +283,7 @@ bool CommandHandler::HandleCustom(std::string const& user_input)
     if (!cb.match.empty())
     {
       loaded_controller_.AddCustomCommand(loaded_channel_.channel, cb);
+      loaded_channel_ = loaded_controller_.RequestChannelData(loaded_channel_.channel);
       return true;
     }
   }
@@ -293,10 +293,14 @@ bool CommandHandler::HandleCustom(std::string const& user_input)
 
 bool CommandHandler::HandleRemove(std::string const& user_input)
 {
+  bool ret = false;
   if (UserHasPermissionsForCommand(CommandPerm::MOD))
-    return loaded_controller_.RemoveCustomCommand(loaded_channel_.channel, user_input);
+  {
+    ret = loaded_controller_.RemoveCustomCommand(loaded_channel_.channel, user_input);
+    loaded_channel_ = loaded_controller_.RequestChannelData(loaded_channel_.channel);
+  }
 
-  return false;
+  return ret;
 }
 
 // Recursion is to slow ... iterative it is :(

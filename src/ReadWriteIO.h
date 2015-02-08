@@ -16,27 +16,18 @@
 * Authored by: Brandon Schaefer <brandontschaefer@gmail.com>
 */
 
-#ifndef LOADED_CHANNEL_DATA_H
-#define LOADED_CHANNEL_DATA_H
+#ifndef READ_WRITE_I_O_H
+#define READ_WRITE_I_O_H
 
 #include <string>
-#include <set>
-#include <vector>
-
-#include "CommandBreed.h"
 
 namespace irc_bot
 {
 
-struct LoadedChannelData
-{
-  std::string channel;
-  std::string lastfm_username;
-
-  std::set<std::string>     mod_list;
-  std::vector<CommandBreed> custom_commands;
-};
+// Simple Read/Write functions to files. No need for a class
+extern void WriteToFile      (std::string const& raw_info, std::string const& path);
+extern std::string ReadInFile(std::string const& path);
 
 } // namespace irc_bot
 
-#endif // LOADED_CHANNEL_DATA_H
+#endif // READ_WRITE_I_O_H

@@ -15,8 +15,10 @@ set (IRC_BOT_LOADER_SRC
      LastFMCurrentSong.cpp
      LoadedChannelController.cpp
      LoadBasicCommands.cpp
+     ReadWriteIO.cpp
+     StringManipulation.cpp
      SymWeaponInfo.cpp
-     Utils.cpp
+     #Utils.cpp
      main.cpp
     )
 
@@ -31,8 +33,10 @@ set (IRC_BOT_LOADER_HDR
      LoadBasicCommands.h
      LoadedChannelController.h
      LoadedChannelData.h
+     ReadWriteIO.h
+     StringManipulation.h
      SymWeaponInfo.h
-     Utils.h
+     #Utils.h
     )
 
 include_directories (${IRC_BOT_INCLUDE_DIRS} ${CMAKE_BINARY_DIR})

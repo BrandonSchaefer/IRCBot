@@ -16,27 +16,37 @@
 * Authored by: Brandon Schaefer <brandontschaefer@gmail.com>
 */
 
-#ifndef LOADED_CHANNEL_DATA_H
-#define LOADED_CHANNEL_DATA_H
+#ifndef STRING_MANIPULATION_H
+#define STRING_MANIPULATION_H
 
+#include <sstream>
 #include <string>
-#include <set>
 #include <vector>
-
-#include "CommandBreed.h"
 
 namespace irc_bot
 {
 
-struct LoadedChannelData
-{
-  std::string channel;
-  std::string lastfm_username;
+extern std::string RemoveStartingWhitespace(std::string const& str);
+extern std::vector<std::string> SplitString(std::string const& str, std::string const& delims);
 
-  std::set<std::string>     mod_list;
-  std::vector<CommandBreed> custom_commands;
-};
+extern bool SubStringMatch(std::string const& haystack, std::string const& needle);
+extern std::string RemoveMatchingWord(std::string const& user_input, std::string const& match);
+
+extern std::string lowercase(std::string str);
+
+// TODO Maybe a different file for this
+template<typename I, typename O>
+O TypeConverter(I const& i)
+{
+  O output;
+
+  std::stringstream ss;
+  ss << i;
+  ss >> output;
+
+  return output;
+}
 
 } // namespace irc_bot
 
-#endif // LOADED_CHANNEL_DATA_H
+#endif // STRING_MANIPULATION_H

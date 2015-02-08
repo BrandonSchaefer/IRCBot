@@ -1,5 +1,5 @@
 //-*- Mode: C++; indent-tabs-mode: nil; tab-width: 2 -*-
-/* * Copyright (C) CURRENT_YEAR Brandon Schaefer
+/* * Copyright (C) 2015 Brandon Schaefer
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License version 3 as
@@ -27,6 +27,7 @@
 #include "LastFMCurrentSong.h"
 #include "LoadedChannelController.h"
 #include "LoadedChannelData.h"
+#include "SymWeaponInfo.h"
 
 namespace irc_bot
 {
@@ -70,6 +71,7 @@ private:
 
   LoadedChannelController loaded_controller_;
   LoadedChannelData loaded_channel_;
+  SymWeaponInfo sym_weapons_;
   std::string username_;
 };
 

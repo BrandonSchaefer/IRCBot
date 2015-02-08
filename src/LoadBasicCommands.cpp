@@ -1,5 +1,5 @@
 //-*- Mode: C++; indent-tabs-mode: nil; tab-width: 2 -*-
-/* * Copyright (C) CURRENT_YEAR Brandon Schaefer
+/* * Copyright (C) 2015 Brandon Schaefer
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License version 3 as
@@ -17,7 +17,8 @@
 */
 
 #include "LoadBasicCommands.h"
-#include "Utils.h"
+#include "ReadWriteIO.h"
+#include "StringManipulation.h"
 
 #include "config.h"
 
@@ -51,6 +52,11 @@ static CommandPerm GetPermissionType(unsigned int permisson)
   }
 }
 
+static bool is_digit(char const c)
+{
+  return (c >= '0' && c <= '9');
+}
+
 static CommandBreed ConstructCommandBreed(std::string const& str)
 {
   CommandBreed cb;
@@ -70,7 +76,12 @@ static CommandBreed ConstructCommandBreed(std::string const& str)
       return cb;
 
     std::string perm_str = RemoveStartingWhitespace(new_str.substr(start, end));
-    unsigned int perm = TypeConverter<std::string, unsigned int>(perm_str);
+
+    if (!perm_str.empty() && !is_digit(perm_str[0]))
+      return cb;
+
+    unsigned int perm = 2;
+    perm = TypeConverter<std::string, unsigned int>(perm_str);
 
     CommandPerm p = GetPermissionType(perm);
 
@@ -123,14 +134,14 @@ std::vector<CommandBreed> LoadBasicCommandsFromString(std::string const& str)
 
 std::vector<CommandBreed> LoadBasicCommandsFromPath(std::string const& path)
 {
-  std::string raw_basic_commands = ReadInFile(path.c_str());
+  std::string raw_basic_commands = ReadInFile(path);
 
   return ConstructBasicCommands(raw_basic_commands);
 }
 
 std::vector<CommandBreed> LoadBasicCommands()
 {
-  std::string raw_basic_commands = ReadInFile(BASIC_COMMAND_PATH.c_str());
+  std::string raw_basic_commands = ReadInFile(BASIC_COMMAND_PATH);
 
   return ConstructBasicCommands(raw_basic_commands);
 }
