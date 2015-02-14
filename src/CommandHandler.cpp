@@ -25,7 +25,8 @@ namespace irc_bot
 
 namespace
 {
-  std::string const GOOGLE_URL = "http://google.com/#q=";
+  //std::string const GOOGLE_URL = "http://google.com/#q=";
+  std::string const GOOGLE_URL = "http://lmgtfy.com/?q=";
 
   // CONST COMMANDS
   std::string const STATS      = "stats";
@@ -41,6 +42,7 @@ namespace
 
   // TO REPLACE KEYWORDS
   std::string const SYMBOL_USER = "#user";
+  std::string const SYMBOL_ARG  = "#";
 
   std::string const POS_MOD_OP = "+o";
   std::string const NEG_MOD_OP = "-o";
@@ -84,40 +86,19 @@ void CommandHandler::UpdateLoadedChannel(std::string const& server_input)
     loaded_channel_ = loaded_controller_.RequestChannelData(channel);
 }
 
-void CommandHandler::HandleModServerCommand(std::string const& server_input)
+void CommandHandler::HandleModeServerCommand(std::string const& server_input)
 {
   std::vector<std::string> raw_server_mode_list = SplitString(server_input, " \r\n");
 
-  for (size_t i = 0; i < raw_server_mode_list.size(); i++)
+  for (size_t i = 0; i < raw_server_mode_list.size() - 1; i++)
   {
     if (raw_server_mode_list[i] == POS_MOD_OP)
-    {
       loaded_channel_.mod_list.insert(raw_server_mode_list[i + 1]);
-    }
     else if(raw_server_mode_list[i] == NEG_MOD_OP)
-    {
       loaded_channel_.mod_list.erase(raw_server_mode_list[i + 1]);
-    }
   }
 
   loaded_controller_.UpdateChannelData(loaded_channel_);
-}
-
-std::string CommandHandler::ReplaceSymbols(std::string const& message) const
-{
-  if (SubStringMatch(message, SYMBOL_USER))
-  {
-    size_t start = message.find(SYMBOL_USER);
-
-    if (start != std::string::npos)
-    {
-      std::string front = message.substr(0, start);
-      std::string end   = message.substr(start + SYMBOL_USER.size());
-      return front + username_ + end;
-    }
-  }
-
-  return message;
 }
 
 bool CommandHandler::HandleUserInput(IRCBot::Ptr const& bot, std::string const& user_input)
@@ -150,16 +131,27 @@ bool CommandHandler::HandleUserInput(IRCBot::Ptr const& bot, std::string const& 
   }
   else if (SubStringMatch(user_input, CUSTOM))
   {
-    return HandleCustom(RemoveMatchingWord(user_input, CUSTOM));
+    std::string custom_args = RemoveMatchingWord(user_input, CUSTOM);
+    if (HandleCustom(custom_args))
+      message_for_bot = "Command was successfully added!";
+    else
+      message_for_bot = "Failed to add command...";
   }
   else if (SubStringMatch(user_input, REMOVE))
   {
-    return HandleRemove(RemoveMatchingWord(user_input, REMOVE));
+    std::string remove_args = RemoveMatchingWord(user_input, REMOVE);
+    if (HandleRemove(remove_args))
+      message_for_bot = "Command " + remove_args + " successfully removed!";
+    else
+      message_for_bot = "Unable to find command " + remove_args + ", failed to remove.";
   }
   else if (SubStringMatch(user_input, SET_LASTFM))
   {
-    HandleSetLastFM(RemoveMatchingWord(user_input, SET_LASTFM));
-    return true;
+    std::string set_lastfm_args = RemoveMatchingWord(user_input, SET_LASTFM);
+    if (HandleSetLastFM(set_lastfm_args))
+      message_for_bot = "Successfully set the lastfm user name to: " + set_lastfm_args;
+    else
+      message_for_bot = "Failed to set the lastfm user name, you must be a mod or owner!";
   }
   else if (SubStringMatch(user_input, BOT_LEAVE))
   {
@@ -175,7 +167,7 @@ bool CommandHandler::HandleUserInput(IRCBot::Ptr const& bot, std::string const& 
 
   if (!message_for_bot.empty())
   {
-    message_for_bot = ReplaceSymbols(message_for_bot);
+    message_for_bot = ReplaceSymbols(message_for_bot, SYMBOL_USER, username_);
     bot->SendMessage(loaded_channel_.channel, message_for_bot);
   }
 
@@ -203,13 +195,37 @@ bool CommandHandler::UserHasPermissionsForCommand(CommandPerm const& perm) const
   return false;
 }
 
+static std::string ReplaceArguments(std::string const& raw_arugments, std::string const& str)
+{
+  std::vector<std::string> args = SplitString(raw_arugments, " \r\n");
+  std::string replace_str = str;
+
+  for (size_t i = 0; i < args.size(); i++)
+  {
+    std::string str_num = TypeConverter<size_t, std::string>(i+1);
+    std::string find    = SYMBOL_ARG + str_num + SYMBOL_ARG;
+
+    replace_str = ReplaceSymbols(replace_str, find, args[i]);
+  }
+
+  return replace_str;
+}
+
 std::string CommandHandler::CheckBasicCommands(std::vector<CommandBreed> const& commands,
                                                std::string const& user_input) const
 {
   for (auto const& cb : commands)
-    if (user_input == cb.match)
-      if (UserHasPermissionsForCommand(cb.perm))
-        return cb.return_str;
+  {
+    if (UserHasPermissionsForCommand(cb.perm))
+    {
+      std::vector<std::string> split_user_input = SplitString(user_input, " \n\r");
+      if (!split_user_input.empty() && split_user_input[0] == cb.match)
+      {
+        std::string arguemnts = RemoveMatchingWord(user_input, cb.match);
+        return ReplaceArguments(arguemnts, cb.return_str);
+      }
+    }
+  }
 
   return "";
 }
@@ -336,13 +352,16 @@ std::string CommandHandler::HandleFib(std::string const& user_input) const
   return "";
 }
 
-void CommandHandler::HandleSetLastFM(std::string const& user_input)
+bool CommandHandler::HandleSetLastFM(std::string const& user_input)
 {
   if (UserHasPermissionsForCommand(CommandPerm::MOD))
   {
     loaded_channel_.lastfm_username = user_input;
     loaded_controller_.UpdateChannelData(loaded_channel_);
+    return true;
   }
+
+  return false;
 }
 
 std::string CommandHandler::HandleHelp(std::string const& user_input) const

@@ -31,6 +31,7 @@ extern std::vector<std::string> SplitString(std::string const& str, std::string 
 
 extern bool SubStringMatch(std::string const& haystack, std::string const& needle);
 extern std::string RemoveMatchingWord(std::string const& user_input, std::string const& match);
+extern std::string ReplaceSymbols(std::string const& message, std::string const& symbol, std::string const& replace);
 
 extern std::string lowercase(std::string str);
 

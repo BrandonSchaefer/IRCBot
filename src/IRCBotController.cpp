@@ -80,7 +80,7 @@ void IRCBotController::RecvServerInputRecived(std::string const& server_input)
 void IRCBotController::HandleMode(std::string const& server_input)
 {
   command_handler_.UpdateLoadedChannel(server_input);
-  command_handler_.HandleModServerCommand(server_input);
+  command_handler_.HandleModeServerCommand(server_input);
 }
 
 void IRCBotController::HandlePrivMsg(std::string const& server_input)

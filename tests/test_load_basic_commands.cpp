@@ -33,12 +33,12 @@ namespace
 
   // The basics of a valid command
   CommandPerm const PERM          = CommandPerm::MOD;
-  std::string const PERM_STR      = "1";
+  std::string const PERM_STR      = "mod";
   std::string const MATCH         = "test_match";
   std::string const RETURN_STR    = "testing the return str!";
 
   // 3 valid commands here
-  std::string const MULTIPLE_COMMANDS = "#we are testing\n1 a eeks ajdf\n2 b tmps\n2 c test";
+  std::string const MULTIPLE_COMMANDS = "#we are testing\nmod a eeks ajdf\nuser b tmps\nowner c test";
   size_t const VALID_COMMANDS         = 3;
 }
 
@@ -51,6 +51,12 @@ TEST(LoadBasicCommand, TestCommentsReturnNothing)
 TEST(LoadBasicCommand, TestValidCommand)
 {
   std::vector<CommandBreed> commands = LoadBasicCommandsFromString(MULTIPLE_COMMANDS);
+  for (size_t i = 0; i < commands.size(); i++)
+  {
+    EXPECT_FALSE(commands[i].match.empty());
+    EXPECT_FALSE(commands[i].return_str.empty());
+  }
+
   EXPECT_EQ(commands.size(), VALID_COMMANDS);
 }
 
@@ -83,6 +89,7 @@ TEST(LoadBasicCommand, TestLoadSingleCommand)
 TEST(LoadBasicCommand, TestLoadSingleCommandFailure)
 {
   CommandBreed cb = LoadSingleCommandFromString(MATCH + " " + RETURN_STR);
+  EXPECT_EQ  (cb.perm, CommandPerm::NONE);
   EXPECT_TRUE(cb.match.empty());
   EXPECT_TRUE(cb.return_str.empty());
 }

@@ -40,7 +40,7 @@ public:
   void SetUsername(std::string const& username);
   void UpdateLoadedChannel(std::string const& server_input);
 
-  void HandleModServerCommand(std::string const& server_input);
+  void HandleModeServerCommand(std::string const& server_input);
   bool HandleUserInput(IRCBot::Ptr const& bot, std::string const& user_input);
 
 private:
@@ -54,7 +54,7 @@ private:
   std::string HandleHelp    (std::string const& user_input) const;
 
   // Write commands
-  void HandleSetLastFM(std::string const& user_input);
+  bool HandleSetLastFM(std::string const& user_input);
   bool HandleCustom   (std::string const& user_input);
   bool HandleRemove   (std::string const& user_input);
 
@@ -62,9 +62,6 @@ private:
 
   std::string CheckBasicCommands(std::vector<CommandBreed> const& commands,
                                  std::string const& user_input) const;
-
-  // Replaces speical symbols such as #user with the user of the calling command
-  std::string ReplaceSymbols(std::string const& message) const;
 
   std::vector<CommandBreed> basic_commands_;
   LastFMCurrentSong last_song_;

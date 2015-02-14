@@ -1,12 +1,11 @@
 # Basic Command format:
 # <PERMISSION_LEVEL> <MATCH_STRING> <RETURN_STRING>
-# PERMISSION_LEVEL: 0 = OWNER, 1 = MOD, 2 = USER (anything else will be a USER)
 # MATCH_STRING    : A single work no spaces, ex: "testing"
 # RETURN_STRING   : Any amount of words      ex: "this is indeed a test!"
 
 # and a # is a comment :)
 
-1 ts         Symthic Teamspeak IP: 162.208.89.103
-2 rohyal     You just got Rohyal'd! Kappa
-2 sithral    You just got Sithral'd! Kappa
-2 peter      PETER DINKLAGE! http://goo.gl/W5aOam
+mod  ts         Symthic Teamspeak IP: 162.208.89.103
+user rohyal     You just got Rohyal'd! Kappa
+user sithral    You just got Sithral'd! Kappa
+user peter      PETER DINKLAGE! http://goo.gl/W5aOam

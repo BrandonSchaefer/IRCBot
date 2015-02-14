@@ -37,6 +37,8 @@ namespace
 
   std::string const LASTFM_USERNAME = "LASTFM_USERNAME:";
   std::string const MOD_LIST        = "MOD_LIST:";
+
+  std::string const COMMAND         = "COMMAND:";
 }
 
 static std::string GetBackupFileName(std::string const& channel)
@@ -106,6 +108,22 @@ static std::string GenerateModString(LoadedChannelData const& data)
   return ss.str();
 }
 
+static std::string GetPermStr(CommandPerm const& perm)
+{
+  switch (perm)
+  {
+    case CommandPerm::OWNER:
+      return "owner";
+    case CommandPerm::MOD:
+      return "mod";
+    case CommandPerm::USER:
+      return "user";
+    case CommandPerm::NONE:
+    default:
+      return "NONE";
+  }
+}
+
 void SaveChannelData(LoadedChannelData const& data)
 {
   // Backup the current file
@@ -124,7 +142,7 @@ void SaveChannelData(LoadedChannelData const& data)
 
   // Custom Commands
   for (auto const& cb : data.custom_commands)
-    ss << cb.perm << " " << cb.match << " " << cb.return_str << "\n";
+    ss << COMMAND << " " << GetPermStr(cb.perm) << " " << cb.match << " " << cb.return_str << "\n";
 
   WriteToFile(ss.str(), DEFAULT_PATH + data.channel);
   WriteToFile(ss.str(), GetBackupFileName(data.channel));
@@ -148,6 +166,16 @@ static std::set<std::string> GetModsList(std::string const& line)
   return mod_list;
 }
 
+static std::vector<CommandBreed> GetBasicCommands(std::vector<std::string> const& split_channel_data)
+{
+  std::string raw_commands;
+  for (auto const& line : split_channel_data)
+    if (SubStringMatch(line, COMMAND))
+      raw_commands += RemoveMatchingWord(line, COMMAND) + "\n";
+
+  return LoadBasicCommandsFromString(raw_commands);
+}
+
 LoadedChannelData LoadChannelData(std::string const& channel)
 {
   std::string raw_channel_data = LoadRawChannelData(channel);
@@ -167,8 +195,8 @@ LoadedChannelData LoadChannelData(std::string const& channel)
         data.mod_list = GetModsList(line);
     }
 
-    // Find custom commands
-    data.custom_commands = LoadBasicCommandsFromString(raw_channel_data);
+    if (SubStringMatch(raw_channel_data, COMMAND))
+      data.custom_commands = GetBasicCommands(split_channel_data);
   }
 
   return data;

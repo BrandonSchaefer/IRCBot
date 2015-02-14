@@ -46,6 +46,10 @@ namespace
 
   std::string const STR_NUMBER = "17";
   unsigned int NUMBER          = 17;
+
+  std::string const MESSAGE  = "THIS IS A #user TEST #user";
+  std::string const SYMBOL   = "#user";
+  std::string const USERNAME = "sithral";
 }
 
 TEST(StringManipulation, TestRemoveStartingWhitespace)
@@ -95,6 +99,20 @@ TEST(StringManipulation, TestTypeConvertFailure)
 {
   int number = TypeConverter<std::string, int>("laksdjfadf");
   EXPECT_EQ(number, 0);
+}
+
+TEST(StringManipulation, TestReplaceSymbol)
+{
+  std::string new_str = ReplaceSymbols(MESSAGE, SYMBOL, USERNAME);
+  EXPECT_FALSE(SubStringMatch(MESSAGE, USERNAME));
+  EXPECT_TRUE (SubStringMatch(new_str, USERNAME));
+}
+
+TEST(StringManipulation, TestReplaceNoSymbol)
+{
+  std::string new_str = ReplaceSymbols(MESSAGE, USERNAME, USERNAME);
+  EXPECT_FALSE(SubStringMatch(MESSAGE, USERNAME));
+  EXPECT_TRUE (SubStringMatch(new_str, SYMBOL));
 }
 
 } // namespace irc_bot_test

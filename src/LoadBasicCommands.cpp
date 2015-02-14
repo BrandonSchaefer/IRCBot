@@ -33,33 +33,24 @@ namespace
 /*
 Format of a BasicCommand:
 <PermissionsType> <MatchString> <ReturnString>
-int             std::string   std::string
+std::string             std::string   std::string
 */
 
-static CommandPerm GetPermissionType(unsigned int permisson)
+static CommandPerm GetPermissionType(std::string const& permisson)
 {
-  switch (permisson)
-  {
-    case 0:
-      return CommandPerm::OWNER;
-      break;
-    case 1:
-      return CommandPerm::MOD;
-      break;
-    default:
-      return CommandPerm::USER;
-      break;
-  }
-}
-
-static bool is_digit(char const c)
-{
-  return (c >= '0' && c <= '9');
+  if (permisson == "owner")
+    return CommandPerm::OWNER;
+  else if (permisson == "mod")
+    return CommandPerm::MOD;
+  else if (permisson == "user")
+    return CommandPerm::USER;
+  else
+    return CommandPerm::NONE;
 }
 
 static CommandBreed ConstructCommandBreed(std::string const& str)
 {
-  CommandBreed cb;
+  CommandBreed cb = {CommandPerm::NONE};
 
   std::string new_str = RemoveStartingWhitespace(str);
   if (!new_str.empty() && new_str[0] != '\n')
@@ -77,13 +68,12 @@ static CommandBreed ConstructCommandBreed(std::string const& str)
 
     std::string perm_str = RemoveStartingWhitespace(new_str.substr(start, end));
 
-    if (!perm_str.empty() && !is_digit(perm_str[0]))
+    if (perm_str.empty())
       return cb;
 
-    unsigned int perm = 2;
-    perm = TypeConverter<std::string, unsigned int>(perm_str);
-
-    CommandPerm p = GetPermissionType(perm);
+    CommandPerm p = GetPermissionType(perm_str);
+    if (p == CommandPerm::NONE)
+      return cb;
 
     // Find Match
     start = end + 1;

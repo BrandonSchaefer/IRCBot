@@ -21,6 +21,8 @@
 #include "IRCBotOffline.h"
 #include "IRCBotController.h"
 
+#include <string.h>
+
 namespace
 {
   // Server Info
@@ -40,10 +42,19 @@ namespace
                                    };
 }
 
-int main()
+int main(int argc, char* argv[])
 {
-  irc_bot::IRCBot::Ptr bot = std::make_shared<irc_bot::IRCBotOffline>(INFO);
-  //irc_bot::IRCBot::Ptr bot = std::make_shared<irc_bot::IRCBot>(INFO);
+  irc_bot::IRCBot::Ptr bot;
+  if (argc > 1 && argc <= 2)
+  {
+    // Simple way to turn the bot into offline/testing mode
+    if (strcmp("--offline", argv[1]) == 0)
+      bot = std::make_shared<irc_bot::IRCBotOffline>(INFO);
+  }
+  else
+  {
+    bot = std::make_shared<irc_bot::IRCBot>(INFO);
+  }
 
   irc_bot::IRCBotController bot_controller(bot);
 

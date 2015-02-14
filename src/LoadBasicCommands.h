@@ -29,7 +29,7 @@ namespace irc_bot
 
 extern CommandBreed LoadSingleCommandFromString(std::string const& str);
 extern std::vector<CommandBreed> LoadBasicCommandsFromString(std::string const& str);
-extern std::vector<CommandBreed> LoadBasicCommandsFromPath(std::string const& path);
+extern std::vector<CommandBreed> LoadBasicCommandsFromPath  (std::string const& path);
 extern std::vector<CommandBreed> LoadBasicCommands();
 
 } // namespace irc_bot

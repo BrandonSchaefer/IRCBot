@@ -48,3 +48,26 @@ Loading:
     -- username
     -- message
     -- loaded_channel
+
+
+SEARCH AND REPLACE
+
+TEST #1# #2# #3# ##4
+...
+
+TEST THIS IS TEST
+...
+TEST [THIS, IS, TEST]
+REPLACE
+TEST THIS IS TEST #4
+
+Gen list of args:
+  [THIS, IS, TEST]
+
+for (size_t i = 0; i < args.size(); i++)
+{
+  std::string str_num = TypeConverter<size_t, std::string>(i);
+  std::string find    = "#" + str_num + "#";
+
+  new_str = ReplaceSymbols(str, find, args[i]);
+}

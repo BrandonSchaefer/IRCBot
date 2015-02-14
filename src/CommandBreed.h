@@ -28,7 +28,8 @@ enum CommandPerm
 {
   OWNER,
   MOD,
-  USER
+  USER,
+  NONE
 };
 
 struct CommandBreed

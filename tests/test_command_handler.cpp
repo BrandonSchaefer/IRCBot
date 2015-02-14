@@ -38,16 +38,24 @@ namespace
   std::string const CHANNEL   = "#thetest";
 
   std::string const RET_STR   = "ret_str";
-  std::string const MATCH     = "test";
-  std::string const CUSTOM_C  = "custom 2 " + MATCH + " " + RET_STR;
-  std::string const REMOVRE_C = "remove " + MATCH;
+  std::string const MATCH_C     = "test";
+  std::string const CUSTOM_C  = "custom user " + MATCH_C + " " + RET_STR;
+  std::string const REMOVRE_C = "remove " + MATCH_C;
 
-  std::string const HELP      =  "help";
+  // testing the #user command!
+  std::string const MATCH_USER_C  = "test1";
+  std::string const CUSTOM_USER_C = "custom user " + MATCH_USER_C + " " + RET_STR + " #user";
+
+  std::string const HELP      = "help";
   std::string const STATS     = "stats aek";
   std::string const COMPARE   = "compare aek m416";
   std::string const GOOGLE    = "google test";
   std::string const FIB       = "fib 10";
   std::string const BOT_LEAVE = "bot leave";
+
+  //std::string const ARG_CMD   = 
+
+  std::string const SIMPLE_MODE_LIST = ":jtv MODE #thegreatbambibot +o thegreatbambibot";
 
   ServerInfo const INFO = {};
 }
@@ -105,13 +113,14 @@ TEST_F(TestCommandHandler, TestLeaveChannel)
 
 TEST_F(TestCommandHandler, TestCustomCommand)
 {
+  EXPECT_CALL(*bot_, SendMessage(CHANNEL, _));
   EXPECT_CALL(*bot_, SendMessage(CHANNEL, RET_STR));
 
   int ret;
   ret = handler_.HandleUserInput(bot_, CUSTOM_C);
   EXPECT_TRUE(ret);
 
-  ret = handler_.HandleUserInput(bot_, MATCH);
+  ret = handler_.HandleUserInput(bot_, MATCH_C);
   EXPECT_TRUE(ret);
 }
 
@@ -124,8 +133,21 @@ TEST_F(TestCommandHandler, TestRemoveCommand)
   ret = handler_.HandleUserInput(bot_, REMOVRE_C);
   EXPECT_TRUE(ret);
 
-  ret = handler_.HandleUserInput(bot_, MATCH);
+  ret = handler_.HandleUserInput(bot_, MATCH_C);
   EXPECT_FALSE(ret);
+}
+
+TEST_F(TestCommandHandler, TestCustomUserCommand)
+{
+  EXPECT_CALL(*bot_, SendMessage(CHANNEL, _));
+  EXPECT_CALL(*bot_, SendMessage(CHANNEL, RET_STR + " " + USERNAME));
+
+  int ret;
+  ret = handler_.HandleUserInput(bot_, CUSTOM_USER_C);
+  EXPECT_TRUE(ret);
+
+  ret = handler_.HandleUserInput(bot_, MATCH_USER_C);
+  EXPECT_TRUE(ret);
 }
 
 } // namespace irc_bot

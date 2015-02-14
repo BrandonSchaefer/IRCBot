@@ -69,6 +69,25 @@ std::vector<std::string> SplitString(std::string const& str, std::string const& 
   return split_str;
 }
 
+std::string ReplaceSymbols(std::string const& message, std::string const& symbol, std::string const& replace)
+{
+  std::string new_str = message;
+
+  while (SubStringMatch(new_str, symbol))
+  {
+    size_t start = new_str.find(symbol);
+
+    if (start != std::string::npos)
+    {
+      std::string front = new_str.substr(0, start);
+      std::string end   = new_str.substr(start + symbol.size());
+      new_str = front + replace + end;
+    }
+  }
+
+  return new_str;
+}
+
 std::string lowercase(std::string str)
 {
   std::transform(str.begin(), str.end(), str.begin(), ::tolower);
