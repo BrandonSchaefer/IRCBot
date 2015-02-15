@@ -84,6 +84,9 @@ static CommandBreed ConstructCommandBreed(std::string const& str)
 
     std::string match = RemoveStartingWhitespace(new_str.substr(start, end - start));
 
+    // Always make sure we are lowercase!
+    match = lowercase(match);
+
     // Find Return
     std::string return_str = RemoveStartingWhitespace(new_str.substr(end + 1));
 

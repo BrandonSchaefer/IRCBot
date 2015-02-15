@@ -132,10 +132,7 @@ bool CommandHandler::HandleUserInput(IRCBot::Ptr const& bot, std::string const& 
   else if (SubStringMatch(user_input, CUSTOM))
   {
     std::string custom_args = RemoveMatchingWord(user_input, CUSTOM);
-    if (HandleCustom(custom_args))
-      message_for_bot = "Command was successfully added!";
-    else
-      message_for_bot = "Failed to add command...";
+    message_for_bot = HandleCustom(custom_args);
   }
   else if (SubStringMatch(user_input, REMOVE))
   {
@@ -216,10 +213,11 @@ std::string CommandHandler::CheckBasicCommands(std::vector<CommandBreed> const& 
 {
   for (auto const& cb : commands)
   {
-    if (UserHasPermissionsForCommand(cb.perm))
+    if (UserHasPermissionsForCommand(cb.perm) && !user_input.empty())
     {
       std::vector<std::string> split_user_input = SplitString(user_input, " \n\r");
-      if (!split_user_input.empty() && split_user_input[0] == cb.match)
+      std::string command = lowercase(split_user_input[0]);
+      if (command == cb.match)
       {
         std::string arguemnts = RemoveMatchingWord(user_input, cb.match);
         return ReplaceArguments(arguemnts, cb.return_str);
@@ -272,7 +270,18 @@ std::string CommandHandler::HandleCompare(std::string const& user_input) const
 std::string CommandHandler::HandleGoogle(std::string const& user_input) const
 {
   if (UserHasPermissionsForCommand(CommandPerm::MOD))
-    return GOOGLE_URL + user_input;
+  {
+    std::string google_search;
+    for (auto const& c : user_input)
+    {
+      if (c == ' ')
+        google_search += "+";
+      else
+        google_search += c;
+    }
+
+    return GOOGLE_URL + google_search;
+  }
 
   return "";
 }
@@ -290,7 +299,7 @@ std::string CommandHandler::HandleSong(std::string const& user_input) const
   return "";
 }
 
-bool CommandHandler::HandleCustom(std::string const& user_input)
+std::string CommandHandler::HandleCustom(std::string const& user_input)
 {
   if (UserHasPermissionsForCommand(CommandPerm::MOD))
   {
@@ -298,13 +307,17 @@ bool CommandHandler::HandleCustom(std::string const& user_input)
 
     if (!cb.match.empty())
     {
-      loaded_controller_.AddCustomCommand(loaded_channel_.channel, cb);
+      bool handled = loaded_controller_.AddCustomCommand(loaded_channel_.channel, cb);
       loaded_channel_ = loaded_controller_.RequestChannelData(loaded_channel_.channel);
-      return true;
+
+      if (handled)
+        return "Command " + cb.match + " was successfully added!";
+      else
+        return "Failed to add command " + cb.match + " already exists!";
     }
   }
 
-  return false;
+  return "Invalid arguments, must be: !custom <PERMISSIOM> <MATCH> <RETURN_STR>";
 }
 
 bool CommandHandler::HandleRemove(std::string const& user_input)

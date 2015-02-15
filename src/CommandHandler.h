@@ -52,10 +52,10 @@ private:
   std::string HandleGoogle  (std::string const& user_input) const;
   std::string HandleFib     (std::string const& user_input) const;
   std::string HandleHelp    (std::string const& user_input) const;
+  std::string HandleCustom  (std::string const& user_input);
 
   // Write commands
   bool HandleSetLastFM(std::string const& user_input);
-  bool HandleCustom   (std::string const& user_input);
   bool HandleRemove   (std::string const& user_input);
 
   bool UserHasPermissionsForCommand(CommandPerm const& perm) const;

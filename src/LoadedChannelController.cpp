@@ -44,7 +44,7 @@ static bool IsDuplicateCommand(std::vector<CommandBreed> const& commands, Comman
   return false;
 }
 
-void LoadedChannelController::AddCustomCommand(std::string const& channel, CommandBreed const& cb)
+bool LoadedChannelController::AddCustomCommand(std::string const& channel, CommandBreed const& cb)
 {
   LoadedChannelData channel_data = RequestChannelData(channel);
 
@@ -52,7 +52,10 @@ void LoadedChannelController::AddCustomCommand(std::string const& channel, Comma
   {
     channel_data.custom_commands.push_back(cb);
     UpdateChannelData(channel_data);
+    return true;
   }
+
+  return false;
 }
 
 bool LoadedChannelController::RemoveCustomCommand(std::string const& channel, std::string const& match_str)
