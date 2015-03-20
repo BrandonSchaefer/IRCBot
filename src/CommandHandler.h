@@ -62,8 +62,8 @@ private:
   std::string HandleCustom     (std::string const& user_input);
 
   // Write commands
-  bool HandleSetLastFM(std::string const& user_input);
-  bool HandleRemove   (std::string const& user_input);
+  std::string HandleSetLastFM(std::string const& user_input);
+  std::string HandleRemove   (std::string const& user_input);
 
   bool UserHasPermissionsForCommand(CommandPerm const& perm) const;
 
@@ -71,12 +71,13 @@ private:
                                  std::string const& user_input) const;
 
   std::vector<CommandBreed> basic_commands_;
-  LastFMCurrentSong last_song_;
+  std::vector<Command>      commands_;
+  LastFMCurrentSong         last_song_;
 
   LoadedChannelController loaded_controller_;
-  LoadedChannelData loaded_channel_;
-  SymWeaponInfo sym_weapons_;
-  std::string username_;
+  LoadedChannelData       loaded_channel_;
+  SymWeaponInfo           sym_weapons_;
+  std::string             username_;
 };
 
 } // namespace irc_bot

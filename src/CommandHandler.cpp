@@ -74,6 +74,24 @@ static std::string GetChannel(std::string const& str)
 CommandHandler::CommandHandler()
   : basic_commands_(LoadBasicCommands())
 {
+  Command stats      = {STATS,      std::bind(&CommandHandler::HandleStats,       this, std::placeholders::_1)};
+  Command play_stats = {PLAY_STATS, std::bind(&CommandHandler::HandlePlayerStats, this, std::placeholders::_1)};
+  Command compare    = {COMPARE,    std::bind(&CommandHandler::HandleCompare,     this, std::placeholders::_1)};
+  Command song       = {SONG,       std::bind(&CommandHandler::HandleSong,        this, std::placeholders::_1)};
+  Command custom     = {CUSTOM,     std::bind(&CommandHandler::HandleCustom,      this, std::placeholders::_1)};
+  Command remove     = {REMOVE,     std::bind(&CommandHandler::HandleRemove,      this, std::placeholders::_1)};
+  Command google     = {GOOGLE,     std::bind(&CommandHandler::HandleGoogle,      this, std::placeholders::_1)};
+  Command fib        = {FIB,        std::bind(&CommandHandler::HandleFib,         this, std::placeholders::_1)};
+  Command help       = {HELP,       std::bind(&CommandHandler::HandleHelp,        this, std::placeholders::_1)};
+  Command set_lastfm = {SET_LASTFM, std::bind(&CommandHandler::HandleSetLastFM,   this, std::placeholders::_1)};
+
+  commands_ = {
+               stats,   play_stats,
+               compare, song,
+               custom,  remove,
+               google,  fib,
+               help,    set_lastfm,
+              };
 }
 
 void CommandHandler::SetUsername(std::string const& username)
@@ -107,65 +125,24 @@ bool CommandHandler::HandleUserInput(IRCBot::Ptr const& bot, std::string const& 
 {
   std::string message_for_bot;
 
-  if (SubStringMatch(user_input, PLAY_STATS))
+  for (auto& command : commands_)
+    if (SubStringMatch(user_input, command.match_str))
+      message_for_bot = command.function(RemoveMatchingWord(user_input, command.match_str));
+
+  // FIXME I should look at cleaning this part of a bit
+  if (message_for_bot.empty())
   {
-    message_for_bot = HandlePlayerStats(RemoveMatchingWord(user_input, PLAY_STATS));
-  }
-  else  if (SubStringMatch(user_input, STATS))
-  {
-    message_for_bot = HandleStats(RemoveMatchingWord(user_input, STATS));
-  }
-  else if (SubStringMatch(user_input, COMPARE))
-  {
-    message_for_bot = HandleCompare(RemoveMatchingWord(user_input, COMPARE));
-  }
-  else if (SubStringMatch(user_input, SONG))
-  {
-    message_for_bot = HandleSong(RemoveMatchingWord(user_input, SONG));
-  }
-  else if (SubStringMatch(user_input, FIB))
-  {
-    message_for_bot = HandleFib(RemoveMatchingWord(user_input, FIB));
-  }
-  else if (SubStringMatch(user_input, GOOGLE))
-  {
-    message_for_bot = HandleGoogle(RemoveMatchingWord(user_input, GOOGLE));
-  }
-  else if (SubStringMatch(user_input, HELP))
-  {
-    message_for_bot = HandleHelp(RemoveMatchingWord(user_input, HELP));
-  }
-  else if (SubStringMatch(user_input, CUSTOM))
-  {
-    std::string custom_args = RemoveMatchingWord(user_input, CUSTOM);
-    message_for_bot = HandleCustom(custom_args);
-  }
-  else if (SubStringMatch(user_input, REMOVE))
-  {
-    std::string remove_args = RemoveMatchingWord(user_input, REMOVE);
-    if (HandleRemove(remove_args))
-      message_for_bot = "Command " + remove_args + " successfully removed!";
+    if (SubStringMatch(user_input, BOT_LEAVE))
+    {
+      std::string usr_channel = "#" + username_;
+      bot->SendMessage (usr_channel, "Alright, I'll leave... BibleThump");
+      bot->LeaveChannel(usr_channel);
+      return true;
+    }
     else
-      message_for_bot = "Unable to find command " + remove_args + ", failed to remove.";
-  }
-  else if (SubStringMatch(user_input, SET_LASTFM))
-  {
-    std::string set_lastfm_args = RemoveMatchingWord(user_input, SET_LASTFM);
-    if (HandleSetLastFM(set_lastfm_args))
-      message_for_bot = "Successfully set the lastfm user name to: " + set_lastfm_args;
-    else
-      message_for_bot = "Failed to set the lastfm user name, you must be a mod or owner!";
-  }
-  else if (SubStringMatch(user_input, BOT_LEAVE))
-  {
-    std::string usr_channel = "#" + username_;
-    bot->SendMessage (usr_channel, "Alright, I'll leave... BibleThump");
-    bot->LeaveChannel(usr_channel);
-    return true;
-  }
-  else
-  {
-    message_for_bot = HandleBasic(user_input);
+    {
+      message_for_bot = HandleBasic(user_input);
+    }
   }
 
   if (!message_for_bot.empty())
@@ -334,16 +311,17 @@ std::string CommandHandler::HandleCustom(std::string const& user_input)
   return "Invalid arguments, must be: !custom <PERMISSIOM> <MATCH> <RETURN_STR>";
 }
 
-bool CommandHandler::HandleRemove(std::string const& user_input)
+std::string CommandHandler::HandleRemove(std::string const& user_input)
 {
-  bool ret = false;
   if (UserHasPermissionsForCommand(CommandPerm::MOD))
   {
-    ret = loaded_controller_.RemoveCustomCommand(loaded_channel_.channel, user_input);
+    loaded_controller_.RemoveCustomCommand(loaded_channel_.channel, user_input);
     loaded_channel_ = loaded_controller_.RequestChannelData(loaded_channel_.channel);
+
+    return "Command " + user_input + " successfully removed!";
   }
 
-  return ret;
+  return "Unable to find command " + user_input + ", failed to remove.";
 }
 
 // Recursion is to slow ... iterative it is :(
@@ -379,16 +357,17 @@ std::string CommandHandler::HandleFib(std::string const& user_input) const
   return "";
 }
 
-bool CommandHandler::HandleSetLastFM(std::string const& user_input)
+std::string CommandHandler::HandleSetLastFM(std::string const& user_input)
 {
   if (UserHasPermissionsForCommand(CommandPerm::MOD))
   {
     loaded_channel_.lastfm_username = user_input;
     loaded_controller_.UpdateChannelData(loaded_channel_);
-    return true;
+
+    return "Successfully set the lastfm user name to: " + user_input;
   }
 
-  return false;
+  return "Failed to set the lastfm user name, you must be a mod or owner!";
 }
 
 std::string CommandHandler::HandleHelp(std::string const& user_input) const
