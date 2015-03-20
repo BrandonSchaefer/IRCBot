@@ -70,7 +70,7 @@ if (GTEST_SRC_DIR AND
   include_directories (${IRC_BOT_SOURCE_DIR}/src ${GTEST_INCLUDE_DIR} ${CMAKE_BINARY_DIR})
 
   add_executable        (gtest_irc_bot ${GTEST_BACKEND_SOURCE})
-  target_link_libraries (gtest_irc_bot irc_bot_lib -lcurl ${GTEST_GMOCK_LIB})
+  target_link_libraries (gtest_irc_bot irc_bot_lib ${IRC_BOT_LDFLAGS} ${GTEST_GMOCK_LIB})
 
   add_custom_target (check COMMAND make -j4 COMMAND gtest_irc_bot)
 

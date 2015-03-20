@@ -32,7 +32,7 @@ namespace
   //std::string const SERVER   = "irc.freenode.net";
   std::string const PORT     = "6667";
   // FIXME Figure out how to correctly store this password...plain test == BAD BAD FUCKING BAD (hello!)
-  std::string const PASSWORD = ""; // FIXME TODO REMOVE ME BEFORE COMMITS!
+  std::string const PASSWORD = "oauth:z11bz3a6fzf1d8a2jbqd9demm8di2j"; // FIXME TODO REMOVE ME BEFORE COMMITS!
   std::string const NICK     = "TheGreatBambiBot";
   std::string const USER     = "TheGreateBambiBot nothing here :Real Name";
 

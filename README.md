@@ -3,6 +3,11 @@ IRCBot made mainly for use on twitch channels
 Dependices for debian/ubuntu:
 
     libcurl4-gnutls-dev
+    libjsoncpp-dev
+
+Optional dependices for testing on debian/ubuntu:
+
+    google-mock
 
 To compile on debian/ubuntu:
 
@@ -10,6 +15,10 @@ To compile on debian/ubuntu:
     cd build
     cmake ..
     make -j4
+
+To run tests:
+
+    make check
 
 Windows:
 

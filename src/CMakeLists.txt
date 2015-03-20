@@ -1,6 +1,7 @@
 find_package (PkgConfig)
 
 set (IRC_BOT_REQUIRED
+     jsoncpp
      libcurl
     )
 
@@ -42,4 +43,4 @@ include_directories (${IRC_BOT_INCLUDE_DIRS} ${CMAKE_BINARY_DIR})
 add_executable (irc_bot     ${IRC_BOT_LOADER_SRC} ${IRC_BOT_LOADER_HDR})
 add_library    (irc_bot_lib ${IRC_BOT_LOADER_SRC} ${IRC_BOT_LOADER_HDR})
 
-target_link_libraries (irc_bot -lcurl ${IRC_BOT_LIBRARIES} ${IRC_BOT_LDFLAGS})
+target_link_libraries (irc_bot ${IRC_BOT_LIBRARIES} ${IRC_BOT_LDFLAGS})
