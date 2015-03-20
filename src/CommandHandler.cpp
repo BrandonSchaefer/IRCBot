@@ -26,10 +26,12 @@ namespace irc_bot
 namespace
 {
   //std::string const GOOGLE_URL = "http://google.com/#q=";
-  std::string const GOOGLE_URL = "http://lmgtfy.com/?q=";
+  std::string const GOOGLE_URL    = "http://lmgtfy.com/?q=";
+  std::string const BF4_STATS_URL = "http://bf4stats.com/pc/";
 
   // CONST COMMANDS
   std::string const STATS      = "stats";
+  std::string const PLAY_STATS = "playerstats";
   std::string const COMPARE    = "compare";
   std::string const SONG       = "song";
   std::string const CUSTOM     = "custom";
@@ -105,7 +107,11 @@ bool CommandHandler::HandleUserInput(IRCBot::Ptr const& bot, std::string const& 
 {
   std::string message_for_bot;
 
-  if (SubStringMatch(user_input, STATS))
+  if (SubStringMatch(user_input, PLAY_STATS))
+  {
+    message_for_bot = HandlePlayerStats(RemoveMatchingWord(user_input, PLAY_STATS));
+  }
+  else  if (SubStringMatch(user_input, STATS))
   {
     message_for_bot = HandleStats(RemoveMatchingWord(user_input, STATS));
   }
@@ -249,6 +255,14 @@ std::string CommandHandler::HandleStats(std::string const& user_input) const
   return "";
 }
 
+std::string CommandHandler::HandlePlayerStats(std::string const& user_input) const
+{
+  if (!user_input.empty())
+    return BF4_STATS_URL + user_input;
+
+  return "";
+}
+
 std::string CommandHandler::HandleCompare(std::string const& user_input) const
 {
   size_t first_weapon_end = user_input.find(' ');
@@ -383,11 +397,11 @@ std::string CommandHandler::HandleHelp(std::string const& user_input) const
 
   for (auto const& command : basic_commands_)
     if (UserHasPermissionsForCommand(command.perm))
-      ss << command.match << ", ";
+      ss << "!" << command.match << ", ";
 
   for (auto const& command : loaded_channel_.custom_commands)
     if (UserHasPermissionsForCommand(command.perm))
-      ss << command.match << ", ";
+      ss << "!" << command.match << ", ";
 
   std::string help_str = ss.str();
 

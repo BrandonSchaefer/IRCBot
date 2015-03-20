@@ -69,6 +69,32 @@ std::vector<std::string> SplitString(std::string const& str, std::string const& 
   return split_str;
 }
 
+std::string ReplaceCharacters(std::string const& str, char const replace, std::string delims)
+{
+  std::string new_str;
+
+  for (auto const& c : str)
+  {
+    if (delims.find(c) == std::string::npos)
+      new_str += c;
+    else
+      new_str += replace;
+  }
+
+  return new_str;
+}
+
+std::string RemoveCharacters(std::string const& str, std::string const& delims)
+{
+  std::string new_str;
+
+  for (auto const& c : str)
+    if (delims.find(c) == std::string::npos)
+      new_str += c;
+
+  return new_str;
+}
+
 std::string ReplaceSymbols(std::string const& message, std::string const& symbol, std::string const& replace)
 {
   std::string new_str = message;

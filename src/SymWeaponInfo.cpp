@@ -58,18 +58,27 @@ void SymWeaponInfo::LoadInWeaponInfo()
 {
   std::string raw_weapon_info = ReadInFile(DEFAULT_PATH);
   if (!raw_weapon_info.empty())
-    weapon_info_ = SplitString(raw_weapon_info, " \r\n");
+  {
+    std::vector<std::string> weapons = SplitString(raw_weapon_info, "\r\n");
+
+    // Filter out comments
+    for (auto const& str : weapons)
+      if (!str.empty() && str[0] != '#')
+        weapon_info_.push_back(str);
+  }
 }
 
 /*
 Loop through all BASE_WEAPONS
+ckSDLWindow.TestSetWindowData
 case 1: Keep name the same, check for a sub str match
 case 2: Remove all _/-, and check for a sub str match
 */
-std::string SymWeaponInfo::GetWeapon(std::string const& search_weapon) const
+std::string SymWeaponInfo::GetWeapon(std::string const& raw_search_weapon) const
 {
-  if (!search_weapon.empty())
+  if (!raw_search_weapon.empty())
   {
+    std::string search_weapon = RemoveCharacters(raw_search_weapon, " _-");
     std::string l_search_weapon = search_weapon;
     std::transform(l_search_weapon.begin(), l_search_weapon.end(), l_search_weapon.begin(), ::tolower);
 

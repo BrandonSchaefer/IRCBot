@@ -50,6 +50,10 @@ namespace
   std::string const MESSAGE  = "THIS IS A #user TEST #user";
   std::string const SYMBOL   = "#user";
   std::string const USERNAME = "sithral";
+
+  std::string const REMOVE_DELM = "1234567890\r\n";
+  std::string const REMOVE_MSG  = "a1b2c3d4e5f6g7h8i9j0k\r\n";
+  std::string const EXPECT_MSG  = "abcdefghijk";
 }
 
 TEST(StringManipulation, TestRemoveStartingWhitespace)
@@ -113,6 +117,12 @@ TEST(StringManipulation, TestReplaceNoSymbol)
   std::string new_str = ReplaceSymbols(MESSAGE, USERNAME, USERNAME);
   EXPECT_FALSE(SubStringMatch(MESSAGE, USERNAME));
   EXPECT_TRUE (SubStringMatch(new_str, SYMBOL));
+}
+
+TEST(StringManipulation, TestRemoveCharacters)
+{
+  std::string new_str = RemoveCharacters(REMOVE_MSG, REMOVE_DELM);
+  EXPECT_EQ(new_str, EXPECT_MSG);
 }
 
 } // namespace irc_bot_test

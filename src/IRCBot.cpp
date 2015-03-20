@@ -33,7 +33,8 @@ namespace irc_bot
 
 namespace
 {
-  const int MAX_BUFF = 256;
+  int const MAX_BUFF = 512;
+  std::string const NEW_LINE = "\r\n";
 }
 
 IRCBot::IRCBot(ServerInfo const& info)
@@ -88,9 +89,9 @@ bool IRCBot::ConnectToIRCServer()
 {
   // Send info to connect the the correct irc server
   // Order matters PASS, NICK, USER
-  std::string pass = "PASS " + info_.password;
-  std::string nick = "NICK " + info_.nick;
-  std::string user = "USER " + info_.user;
+  std::string pass = "PASS " + info_.password + NEW_LINE;
+  std::string nick = "NICK " + info_.nick     + NEW_LINE;
+  std::string user = "USER " + info_.user     + NEW_LINE;
 
   bool ret;
 
@@ -103,19 +104,19 @@ bool IRCBot::ConnectToIRCServer()
 
 void IRCBot::JoinChannel(std::string const& channel) const
 {
-  std::string message = "JOIN " + channel + "\r\n";
+  std::string message = "JOIN " + channel + NEW_LINE;
   SendData(message);
 }
 
 void IRCBot::LeaveChannel(std::string const& channel) const
 {
-  std::string message = "PART " + channel + "\r\n";
+  std::string message = "PART " + channel + NEW_LINE;
   SendData(message);
 }
 
 void IRCBot::SendMessage(std::string const& channel, std::string const& message) const
 {
-  std::string priv_message = "PRIVMSG " + channel + " :" + message + "\r\n";
+  std::string priv_message = "PRIVMSG " + channel + " :" + message + NEW_LINE;
   SendData(priv_message);
 }
 

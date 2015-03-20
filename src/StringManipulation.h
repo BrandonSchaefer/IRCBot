@@ -27,6 +27,8 @@ namespace irc_bot
 {
 
 extern std::string RemoveStartingWhitespace(std::string const& str);
+extern std::string ReplaceCharacters(std::string const& str, char const replace, std::string delims);
+extern std::string RemoveCharacters(std::string const& str, std::string const& delims);
 extern std::vector<std::string> SplitString(std::string const& str, std::string const& delims);
 
 extern bool SubStringMatch(std::string const& haystack, std::string const& needle);

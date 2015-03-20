@@ -23,6 +23,8 @@
 
 #include <string.h>
 
+#include "ReadWriteIO.h"
+
 namespace
 {
   // Server Info
@@ -30,9 +32,9 @@ namespace
   //std::string const SERVER   = "irc.freenode.net";
   std::string const PORT     = "6667";
   // FIXME Figure out how to correctly store this password...plain test == BAD BAD FUCKING BAD (hello!)
-  std::string const PASSWORD = "\r\n"; // FIXME TODO REMOVE ME BEFORE COMMITS!
-  std::string const NICK     = "TheGreatBambiBot\r\n";
-  std::string const USER     = "TheGreateBambiBot nothing here :Real Name\r\n";
+  std::string const PASSWORD = ""; // FIXME TODO REMOVE ME BEFORE COMMITS!
+  std::string const NICK     = "TheGreatBambiBot";
+  std::string const USER     = "TheGreateBambiBot nothing here :Real Name";
 
   irc_bot::ServerInfo const INFO = { SERVER,
                                      PORT,

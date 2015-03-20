@@ -33,7 +33,7 @@ namespace
   // BOT SPECIFIC COMMANDS ONLY
   std::string const BOT_JOIN = "bot join";
 
-  std::string const CHANNEL = "#colossusofc1out,#thegreatbambibot";
+  std::string const CHANNEL = "#grandbeast,#colossusofc1out,#thegreatbambibot";
 }
 
 static std::string GetMessage(std::string const& str)
@@ -51,6 +51,8 @@ static std::string GetUsername(std::string const& str)
 
   return RemoveStartingWhitespace(str.substr(start_of_username, end_of_username - start_of_username));
 }
+
+#include <unistd.h>
 
 IRCBotController::IRCBotController(IRCBot::Ptr const& bot)
   : basic_commands_(LoadBasicCommands())

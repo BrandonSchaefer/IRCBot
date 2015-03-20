@@ -32,6 +32,12 @@
 namespace irc_bot
 {
 
+struct Command
+{
+  std::string match_str;
+  std::function<std::string(std::string const&)> function;
+};
+
 class CommandHandler
 {
 public:
@@ -45,14 +51,15 @@ public:
 
 private:
   // Read commands
-  std::string HandleBasic   (std::string const& user_input) const;
-  std::string HandleStats   (std::string const& user_input) const;
-  std::string HandleCompare (std::string const& user_input) const;
-  std::string HandleSong    (std::string const& user_input) const;
-  std::string HandleGoogle  (std::string const& user_input) const;
-  std::string HandleFib     (std::string const& user_input) const;
-  std::string HandleHelp    (std::string const& user_input) const;
-  std::string HandleCustom  (std::string const& user_input);
+  std::string HandleBasic      (std::string const& user_input) const;
+  std::string HandleStats      (std::string const& user_input) const;
+  std::string HandlePlayerStats(std::string const& user_input) const;
+  std::string HandleCompare    (std::string const& user_input) const;
+  std::string HandleSong       (std::string const& user_input) const;
+  std::string HandleGoogle     (std::string const& user_input) const;
+  std::string HandleFib        (std::string const& user_input) const;
+  std::string HandleHelp       (std::string const& user_input) const;
+  std::string HandleCustom     (std::string const& user_input);
 
   // Write commands
   bool HandleSetLastFM(std::string const& user_input);

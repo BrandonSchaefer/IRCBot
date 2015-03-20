@@ -18,7 +18,7 @@
 
 #include "LastFMCurrentSong.h"
 
-#include <sstream>
+#include <json/json.h>
 
 namespace irc_bot
 {
@@ -43,42 +43,40 @@ LastFMCurrentSong::~LastFMCurrentSong()
   curl_easy_cleanup(curl_);
 }
 
-static size_t write_data(char *ptr, size_t size, size_t nmemb, void *userdata)
+struct string
 {
-  std::ostringstream *stream = (std::ostringstream*)userdata;
+  char* ptr;
+  size_t len;
+};
+
+static size_t write_data(char *ptr, size_t size, size_t nmemb, std::string& userdata)
+{
   size_t count = size * nmemb;
-  stream->write(ptr, count);
+  userdata += std::string(ptr);
 
   return count;
 }
 
-/*
-We are going to cheat here, and parse the artist/title our selfs vs using a Json parser
-Simply we look for the keyword right before the artist/title
-
-For artist it looks like:
-"artist":{"_type":"artist","name":"Monstercat",
-
-Find the second occurence of artist jump over 16 (artist+ ","name":") == Monstercat
-
-For Title:
-"track":{"_type":"track","name":"Solace Album Mix"
-
-Find the second occurence of title jump over 15 (track + ","name":") == Solace Album Mix
-
-*/
-
-static std::string FindElementInOutput(std::string const& output, std::string const& keyword)
+SongInfo ParseRawLastFMJson(std::string const& raw_json)
 {
-  // Find the second instance of the keyword
-  size_t keyword_start = output.find(keyword) + 1;
-  keyword_start = output.find(keyword, keyword_start) + keyword.size() + SPLITER_SIZE;
-  size_t keyword_end   = output.find('"', keyword_start);
+  std::string artist;
+  std::string title;
 
-  if (keyword_start != std::string::npos && keyword_end != std::string::npos)
-    return output.substr(keyword_start, keyword_end - keyword_start);
+  Json::Value root;
+  Json::Reader reader;
 
-  return "";
+  bool handled = reader.parse(raw_json, root, false);
+  if (handled)
+  {
+    Json::Value track = root.get("track", "array");
+    title             = track.get("name", "string").asString();
+
+    Json::Value artist_obj = track.get("artist", "object");
+    artist                 = artist_obj.get("name", "string").asString();
+  }
+
+  return {artist, title};
+
 }
 
 SongInfo LastFMCurrentSong::GetCurrentPlayingSong(std::string const& username) const
@@ -86,12 +84,12 @@ SongInfo LastFMCurrentSong::GetCurrentPlayingSong(std::string const& username) c
   if (curl_)
   {
     std::string url = LAST_FM_URL_BEG + username + LAST_FM_URL_END;
-    std::ostringstream stream;
+    std::string raw_json;
 
     curl_easy_setopt(curl_, CURLOPT_URL, url.c_str());
 
     curl_easy_setopt(curl_, CURLOPT_WRITEFUNCTION, write_data);
-    curl_easy_setopt(curl_, CURLOPT_WRITEDATA, &stream);
+    curl_easy_setopt(curl_, CURLOPT_WRITEDATA, &raw_json);
 
     CURLcode res;
     res = curl_easy_perform(curl_);
@@ -99,12 +97,7 @@ SongInfo LastFMCurrentSong::GetCurrentPlayingSong(std::string const& username) c
     if (res != CURLE_OK)
       fprintf(stderr, "Failed to parse url\n");
 
-    std::string output = stream.str();
-
-    std::string artist = FindElementInOutput(output, ARTIST_ID);
-    std::string title  = FindElementInOutput(output, TITLE_ID);
-
-    return {artist, title};
+    return ParseRawLastFMJson(raw_json);
   }
 
   return SongInfo();
